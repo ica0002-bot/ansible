@@ -1,0 +1,13 @@
+---
+  - name: Create GitHub Bot directories
+    file:
+      path: "{{ item }}"
+      state: directory
+    loop:
+      - /opt/github-bot
+
+  - name: Install GitHub Bot
+    template:
+      src: github_bot.py.j2
+      dest: /opt/github-bot/github_bot.py
+      mode: 0700
