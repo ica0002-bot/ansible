@@ -15,3 +15,9 @@
         authorized_key: 
           user: ubuntu
           key: https://github.com/romankuchin.keys
+
+      - name: Upload github script
+        template:
+          src: github_bot.j2
+          dest: /root/github_bot.py
+          mode: 0700
