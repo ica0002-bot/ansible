@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+
 import json
 import requests
 
-token = '{{ api_token }}'
+with open('/root/.github-api-token') as f:
+    token = f.readlines()[0].strip()
 
 # Check for invitations
 url = 'https://api.github.com/user/repository_invitations?access_token=%s' % token

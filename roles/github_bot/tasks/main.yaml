@@ -7,7 +7,13 @@
       - /opt/github-bot
 
   - name: Install GitHub Bot
-    template:
-      src: github_bot.py.j2
-      dest: /opt/github-bot/github_bot.py
-      mode: 0700
+    copy:
+      src: github-bot
+      dest: /opt/github-bot/github-bot
+      mode: 0755
+
+  - name: Configure GitHub bot
+    copy:
+      dest: /root/.github-api-token
+      content: "{{ github_api_token }}\n"
+      mode: 0600
