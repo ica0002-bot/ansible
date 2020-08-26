@@ -1,0 +1,7 @@
+---
+  - name: Init
+    hosts: vm1
+    become: yes
+    roles:
+      - users
+      - github_bot

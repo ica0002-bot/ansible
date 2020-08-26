@@ -1,26 +1,30 @@
-import requests
+#!/usr/bin/env python3
+
 import json
+import requests
 
-token='{{ api_token }}'
+with open('/root/.github-api-token') as f:
+    token = f.readlines()[0].strip()
 
-# Checking for invitations
-url = 'https://api.github.com/user/repository_invitations?access_token=%s' % (token)
+# Check for invitations
+url = 'https://api.github.com/user/repository_invitations?access_token=%s' % token
 r = requests.get(url)
 for invitation in r.json():
     url = 'https://api.github.com/user/repository_invitations/%d?access_token=%s' % (invitation['id'], token)
     r = requests.patch(url)
     print('Accepted invitation to %s' % invitation['repository']['full_name'])
 
-url = 'https://api.github.com/user/repos?access_token=%s' % (token)
+# Check for repositories
+url = 'https://api.github.com/user/repos?access_token=%s' % token
 r = requests.get(url)
-
 for repo in r.json():
     print('Repo: %s' % repo['full_name'])
     print('Private: %s' % repo['private'])
-    #Check for ssh keys
+
+    # Check for user SSH keys
     key_url = 'https://github.com/%s.keys' % ''.join(repo['full_name'].split('/')[:-1])
     r = requests.get(key_url)
     if 'ssh-rsa' in r.text:
         print('Key: ...%s' % r.text[-10:])
     else:
-        print('Key: Not found')
+        print('Key not found')

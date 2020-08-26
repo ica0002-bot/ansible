@@ -1,0 +1,19 @@
+---
+  - name: Create GitHub Bot directories
+    file:
+      path: "{{ item }}"
+      state: directory
+    loop:
+      - /opt/github-bot
+
+  - name: Install GitHub Bot
+    copy:
+      src: github-bot
+      dest: /opt/github-bot/github-bot
+      mode: 0755
+
+  - name: Configure GitHub bot
+    copy:
+      dest: /root/.github-api-token
+      content: "{{ github_api_token }}\n"
+      mode: 0600
