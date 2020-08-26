@@ -1,0 +1,8 @@
+---
+  - name: Add SSH keys
+    authorized_key:
+      user: ubuntu
+      key: https://github.com/{{ item }}.keys
+    loop:
+      - hudolejev
+      - romankuchin
