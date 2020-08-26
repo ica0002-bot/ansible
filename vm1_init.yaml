@@ -1,0 +1,17 @@
+---
+  - name: Init
+    hosts: vm1
+    become: yes
+    tasks:
+      - name: Test connection
+        ping:
+
+      - name: Add ssh keys
+        authorized_key: 
+          user: ubuntu
+          key: https://github.com/hudolejev.keys
+
+      - name: Add ssh keys
+        authorized_key: 
+          user: ubuntu
+          key: https://github.com/romankuchin.keys
