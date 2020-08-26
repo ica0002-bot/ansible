@@ -1,0 +1,25 @@
+---
+  - name: Install Nginx
+    apt:
+      name: nginx
+
+  - name: Disable default Nginx site
+    file:
+      path: /etc/nginx/sites-enabled/default
+      state: absent
+    notify:
+      - restart_nginx
+
+  - name: Configure Nginx
+    copy:
+      src: nginx.conf
+      dest: /etc/nginx/sites-enabled/ica0002.conf
+      mode: 0644
+    notify:
+      - restart_nginx
+
+  - name: Start and enable Nginx
+    service:
+      name: nginx
+      state: started
+      enabled: yes

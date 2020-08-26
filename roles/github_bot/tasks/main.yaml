@@ -10,3 +10,9 @@
       dest: /root/.github-api-token
       content: "{{ github_api_token }}\n"
       mode: 0600
+
+  - name: Add GitHub Bot CSS file
+    copy:
+      src: style.css
+      dest: /opt/ica0002/pub/style.css
+      mode: 0644

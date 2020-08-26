@@ -1,0 +1,13 @@
+td, th {
+    border: 1px solid #ccc;
+    padding: 0.5em 1em;
+    text-align: center;
+}
+
+.fail {
+    color: #c00;
+}
+
+.ok {
+    color: #0c0;
+}

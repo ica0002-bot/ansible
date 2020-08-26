@@ -6,9 +6,15 @@ import requests
 
 html = '''
 <html>
+    <head>
+        <meta http-equiv="refresh" content="30">
+        <title>ICA0002 Students</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
     <body>
+        <h1>ICA0002 Students</h1>
         <table>
-            <th><td>Repository</td><td>Private?</td><td>SSH key</td></th>
+            <tr><th>Repository</th><th>Private?</th><th>SSH key added?</th></tr>
 '''
 
 with open('/root/.github-api-token') as f:
@@ -43,9 +49,9 @@ for repo in r.json():
     key_url = '%s.keys' % repo['owner']['html_url']
     r = requests.get(key_url)
     if r.text.startswith('ssh-'):
-        repo_html += '<td class="ok">Added</td>'
+        repo_html += '<td class="ok">Yes</td>'
     else:
-        repo_html += '<td class="fail">Missing</td>'
+        repo_html += '<td class="fail">No</td>'
 
     html += '<tr>%s</tr>' % repo_html
 
