@@ -2,20 +2,8 @@
 
 import json
 import requests
+import time
 
-
-html = '''
-<html>
-    <head>
-        <meta http-equiv="refresh" content="30">
-        <title>ICA0002 Students</title>
-        <link rel="stylesheet" type="text/css" href="style.css">
-    </head>
-    <body>
-        <h1>ICA0002 Students</h1>
-        <table>
-            <tr><th>Repository</th><th>Private?</th><th>SSH key added?</th></tr>
-'''
 
 with open('/root/.github-api-token') as f:
     token = f.readlines()[0].strip()
@@ -29,37 +17,74 @@ for invitation in r.json():
     print('Accepted invitation to %s' % invitation['repository']['full_name'])
 
 # Check for repositories
+repos = []
+
 url = 'https://api.github.com/user/repos?access_token=%s' % token
 r = requests.get(url)
-for repo in r.json():
-    #print(json.dumps(repo, indent=2, sort_keys=True))
-
+for raw_repo in r.json():
     # Skip own repos
-    if repo['owner']['login'] in ['ICA0002-bot']:
+    if raw_repo['owner']['login'] in ['ICA0002-bot']:
         continue
 
-    repo_html = '<td>%s</td>' % repo['full_name']
-
-    if repo['private']:
-        repo_html += '<td class="ok">Yes</td>'
-    else:
-        repo_html += '<td class="fail">No</td>'
+    repo = {
+        'name': raw_repo['name'],
+        'owner_key_added': False,
+        'owner_login': raw_repo['owner']['login'],
+        'owner_url': raw_repo['owner']['html_url'],
+        'private': raw_repo['private'],
+        'url': raw_repo['html_url'],
+    }
 
     # Check for user SSH keys
-    key_url = '%s.keys' % repo['owner']['html_url']
+    key_url = '%s.keys' % raw_repo['owner']['html_url']
     r = requests.get(key_url)
     if r.text.startswith('ssh-'):
-        repo_html += '<td class="ok">Yes</td>'
-    else:
-        repo_html += '<td class="fail">No</td>'
+        repo['owner_key_added'] = True
 
-    html += '<tr>%s</tr>' % repo_html
+    repos.append(repo)
+
+# Compose HTML
+html = '''
+<html>
+    <head>
+        <meta http-equiv="refresh" content="30">
+        <title>ICA0002 Students</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <h1>ICA0002 Students</h1>
+        <table>
+            <tr>
+                <th>GitHub user</th>
+                <th>Repository</th>
+                <th>Private?</th>
+                <th>SSH key added?</th>
+            </tr>
+'''
+
+for repo in repos:
+    html += '<tr>'
+    html += '<td><a href="%s">%s</a></td>' % (repo['owner_url'], repo['owner_login'])
+    html += '<td><a href="%s">%s</a></td>' % (repo['url'], repo['name'])
+
+    if repo['private']:
+        html += '<td class="ok">Yes</td>'
+    else:
+        html += '<td class="fail">No</td>'
+
+    if repo['owner_key_added']:
+        html += '<td class="ok">Yes</td>'
+    else:
+        html += '<td class="fail">No</td>'
+
+    html += '</tr>'
 
 html += '''
         </table>
+        <div class="footer">Last checked on %s.</div>
     </body>
 </html>
-'''
+''' % time.strftime('%b %d at %H:%M %Z')
 
 with open('/opt/ica0002/pub/index.html', 'w') as f:
     f.write(html)
