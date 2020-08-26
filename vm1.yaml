@@ -4,4 +4,5 @@
     become: yes
     roles:
       - users
+      - ica0002_base
       - github_bot

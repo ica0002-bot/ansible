@@ -3,6 +3,14 @@
 import json
 import requests
 
+
+html = '''
+<html>
+    <body>
+        <table>
+            <th><td>Repository</td><td>Private?</td><td>SSH key</td></th>
+'''
+
 with open('/root/.github-api-token') as f:
     token = f.readlines()[0].strip()
 
@@ -18,13 +26,34 @@ for invitation in r.json():
 url = 'https://api.github.com/user/repos?access_token=%s' % token
 r = requests.get(url)
 for repo in r.json():
-    print('Repo: %s' % repo['full_name'])
-    print('Private: %s' % repo['private'])
+    #print(json.dumps(repo, indent=2, sort_keys=True))
+
+    # Skip own repos
+    if repo['owner']['login'] in ['ICA0002-bot']:
+        continue
+
+    repo_html = '<td>%s</td>' % repo['full_name']
+
+    if repo['private']:
+        repo_html += '<td class="ok">Yes</td>'
+    else:
+        repo_html += '<td class="fail">No</td>'
 
     # Check for user SSH keys
-    key_url = 'https://github.com/%s.keys' % ''.join(repo['full_name'].split('/')[:-1])
+    key_url = '%s.keys' % repo['owner']['html_url']
     r = requests.get(key_url)
-    if 'ssh-rsa' in r.text:
-        print('Key: ...%s' % r.text[-10:])
+    if r.text.startswith('ssh-'):
+        repo_html += '<td class="ok">Added</td>'
     else:
-        print('Key not found')
+        repo_html += '<td class="fail">Missing</td>'
+
+    html += '<tr>%s</tr>' % repo_html
+
+html += '''
+        </table>
+    </body>
+</html>
+'''
+
+with open('/opt/ica0002/pub/index.html', 'w') as f:
+    f.write(html)

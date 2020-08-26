@@ -1,15 +1,8 @@
 ---
-  - name: Create GitHub Bot directories
-    file:
-      path: "{{ item }}"
-      state: directory
-    loop:
-      - /opt/github-bot
-
   - name: Install GitHub Bot
     copy:
       src: github-bot
-      dest: /opt/github-bot/github-bot
+      dest: /opt/ica0002/bin/github-bot
       mode: 0755
 
   - name: Configure GitHub bot

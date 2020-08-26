@@ -1,0 +1,10 @@
+---
+  - name: Create directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0755
+    loop:
+      - /opt/ica0002
+      - /opt/ica0002/bin
+      - /opt/ica0002/pub
