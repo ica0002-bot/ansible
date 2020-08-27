@@ -34,7 +34,7 @@ def extract_students(vms):
         if not vm['description'] in students:
             students.append(vm['description'])
 
-    return students
+    return sorted(students)
 
 
 def get_vms():
@@ -58,8 +58,8 @@ def get_vms():
             'description': vm['description'],
             'ip': ip,
             'name': vm['name'],
+            'public_url': 'http://193.40.156.86:%s80' % vm_id,
             'ssh_port': '%s22' % vm_id,
-            'url': 'http://%s:%s80' % (ip, vm_id),
             'uuid': vm['uuid'],
         })
 
@@ -72,7 +72,7 @@ def print_vms(vms, student='all'):
         student_vms = extract_student_vms(vms, student)
         print('\nStudent %s VMs:' % student)
         for vm in student_vms:
-            print('  - name: %s   ip: %s   ssh_port: %s   url: %s' % (vm['name'], vm['ip'], vm['ssh_port'], vm['url']))
+            print('  - name: %s   ip: %s   ssh_port: %s   public_url: %s' % (vm['name'], vm['ip'], vm['ssh_port'], vm['public_url']))
 
 
 def create_vm(student, id):
@@ -158,7 +158,7 @@ def write_html(vms):
                     <th>VM names</th>
                     <th>VM IPs</th>
                     <th>VM SSH ports</th>
-                    <th>VM HTTP URLs</th>
+                    <th>VM public URLs</th>
                 </tr>
     '''
 
@@ -173,7 +173,7 @@ def write_html(vms):
             vm_ips.append(vm['ip'])
             vm_names.append(vm['name'])
             vm_ssh_ports.append(vm['ssh_port'])
-            vm_urls.append('<a href="%s">%s</a>' % (vm['url'], vm['url']))
+            vm_urls.append('<a href="%s">%s</a>' % (vm['public_url'], vm['public_url']))
 
         html += '<tr>'
         html += '<td><a href="https://github.com/%s">%s</a></td>' % (student, student)

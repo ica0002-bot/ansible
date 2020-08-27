@@ -44,6 +44,8 @@ for raw_repo in r.json():
 
     repos.append(repo)
 
+repos = sorted(repos, key=lambda k: k['owner_login'])
+
 # Compose HTML
 html = '''
 <html>
