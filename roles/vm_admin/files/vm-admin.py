@@ -5,9 +5,10 @@ import requests
 import sys
 import time
 
-#with open('/root/.openstack-api-token') as f:
-#    token = f.readlines()[0].strip()
-token = '2a5447d8d3b327758aee75e3a93dc31a6da8b894'
+
+with open('/root/.openstack-api-token') as f:
+    token = f.readlines()[0].strip()
+
 headers = {
     "Authorization": "token %s" % token,
     "Content-Type": "application/json"
