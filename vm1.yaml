@@ -6,4 +6,5 @@
       - users
       - ica0002_base
       - github_bot
+      - vm_admin
       - nginx
