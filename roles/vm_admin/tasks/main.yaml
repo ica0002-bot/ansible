@@ -1,0 +1,18 @@
+---
+  - name: Install VM-admin script
+    copy:
+      src: vm-admin.py
+      dest: /opt/ica0002/bin/vm-admin
+      mode: 0755
+
+  - name: Configure VM-admin
+    copy:
+      content: "{{ openstack_api_token }}\n"
+      dest: /root/.openstack-api-token
+      mode: 0600
+
+  - name: Schedule VM-admin to generate html
+    copy:
+      content: "*/5 * * * * root /opt/ica0002/bin/vm-admin html\n"
+      dest: /etc/cron.d/vm-admin-html
+      mode: 0644
