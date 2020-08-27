@@ -23,7 +23,7 @@ url = 'https://api.github.com/user/repos?access_token=%s' % token
 r = requests.get(url)
 for raw_repo in r.json():
     # Skip own repos
-    if raw_repo['owner']['login'] in ['ICA0002-bot']:
+    if raw_repo['owner']['login'] in ['ica0002-bot']:
         continue
 
     repo = {
@@ -49,11 +49,11 @@ html = '''
 <html>
     <head>
         <meta http-equiv="refresh" content="30">
-        <title>ICA0002 Students</title>
+        <title>ICA0002 2020 Students</title>
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
-        <h1>ICA0002 Students</h1>
+        <h1>ICA0002 2020 Students</h1>
         <table>
             <tr>
                 <th>GitHub user</th>

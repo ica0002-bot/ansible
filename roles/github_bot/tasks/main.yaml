@@ -1,7 +1,7 @@
 ---
   - name: Install GitHub Bot
     copy:
-      src: github-bot
+      src: github-bot.py
       dest: /opt/ica0002/bin/github-bot
       mode: 0755
 
