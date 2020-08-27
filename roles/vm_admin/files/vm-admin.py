@@ -84,7 +84,7 @@ def print_help():
         <student_name> <n> - crete/delete VMs for given student''')
 
 
-def generate_html():
+def write_html():
     student_list = []
     for vm in raw_vm_list:
         if not vm['description'] in student_list and vm['description']:
@@ -120,18 +120,17 @@ def generate_html():
         </body>
     </html>
     ''' % time.strftime('%b %d at %H:%M %Z')
+
     with open('/opt/ica0002/pub/vms.html', 'w') as f:
         f.write(html)
 
 
-if len(sys.argv) > 1:
-    if sys.argv[1] == 'html':
-        generate_html()
-    elif len(sys.argv) == 2:
-        get_student_vms(sys.argv[1])
-    elif len(sys.argv) == 3:
-        adjust_student_vms(sys.argv[1], int(sys.argv[2]))
-    else:
-        print_help()
-else:
+if len(sys.argv) <= 1:
     print_help()
+    sys.exit(1)
+elif sys.argv[1] == 'html':
+    write_html()
+elif len(sys.argv) == 2:
+    get_student_vms(sys.argv[1])
+else
+    adjust_student_vms(sys.argv[1], int(sys.argv[2]))
