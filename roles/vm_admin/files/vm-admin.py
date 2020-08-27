@@ -22,9 +22,11 @@ def get_student_vms(student):
     print('Student: %s' % student)
     student_vms = []
     for vm in raw_vm_list:
-        if vm['description'] == student and 'internal_ips' in vm:
+        if vm['description'] != student:
+            continue
+        if 'internal_ips' in vm:
             student_vms.append(','.join(vm['internal_ips']))
-    print('VMs: %s' % ','.join(student_vms))
+    print('VMs: %s' % ', '.join(student_vms))
 
 
 def create_vm(student, id):
@@ -78,10 +80,12 @@ def adjust_student_vms(student, vm_count):
 
 
 def print_help():
-    print('''Usage:
+    print('''Usage: %s <options>
+
+      Options:
         html - generate html page
         <student_name> - print list of VMs for given student
-        <student_name> <n> - crete/delete VMs for given student''')
+        <student_name> <n> - crete/delete VMs for given student''' % sys.argv[0])
 
 
 def write_html():
@@ -89,6 +93,7 @@ def write_html():
     for vm in raw_vm_list:
         if not vm['description'] in student_list and vm['description']:
             student_list.append(vm['description'])
+
     # Compose HTML
     html = '''
     <html>
@@ -105,15 +110,20 @@ def write_html():
                     <th>VM IPs</th>
                 </tr>
     '''
+
     for student in student_list:
         student_ips = []
         for vm in raw_vm_list:
-            if student == vm['description'] and 'internal_ips' in vm:
-                student_ips.append(','.join(vm['internal_ips']))
+            if vm['description'] != student:
+                continue
+            if 'internal_ips' in vm and vm['internal_ips']:
+                student_ips.append(vm['internal_ips'][0])
+
         html += '<tr>'
         html += '<td>%s</td>' % (student)
-        html += '<td>%s</td>' % (','.join(student_ips))
+        html += '<td>%s</td>' % ('<br>'.join(student_ips))
         html += '</tr>'
+
     html += '''
             </table>
             <div class="footer">Last checked on %s.</div>
@@ -132,5 +142,5 @@ elif sys.argv[1] == 'html':
     write_html()
 elif len(sys.argv) == 2:
     get_student_vms(sys.argv[1])
-else
+else:
     adjust_student_vms(sys.argv[1], int(sys.argv[2]))
