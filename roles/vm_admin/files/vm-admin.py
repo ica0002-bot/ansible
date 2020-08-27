@@ -6,7 +6,7 @@ import sys
 import time
 
 
-with open('/root/.openstack-api-token') as f:
+with open('/root/.waldur-api-token') as f:
     token = f.readlines()[0].strip()
 
 headers = {
