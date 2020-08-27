@@ -32,6 +32,7 @@ for raw_repo in r.json():
         'owner_login': raw_repo['owner']['login'],
         'owner_url': raw_repo['owner']['html_url'],
         'private': raw_repo['private'],
+        'pushed_at': raw_repo['pushed_at'],
         'url': raw_repo['html_url'],
     }
 
@@ -59,8 +60,11 @@ html = '''
                 <th>Repository</th>
                 <th>Private?</th>
                 <th>SSH key added?</th>
+                <th>Last activity</th>
             </tr>
 '''
+
+now = int(time.time())
 
 for repo in repos:
     html += '<tr>'
@@ -77,6 +81,18 @@ for repo in repos:
     else:
         html += '<td class="fail">No</td>'
 
+    last_active_time_hours = (now - int(time.mktime(time.strptime(repo['pushed_at'], '%Y-%m-%dT%H:%M:%SZ')))) / 3600
+    if last_active_time_hours < 1:
+        html += '<td class="ok"><abbr title="%s">less than an hour ago</abbr></td>' % repo['pushed_at']
+    elif last_active_time_hours < 24:
+        html += '<td class="ok"><abbr title="%s">less than a day ago</abbr></td>' % repo['pushed_at']
+    elif last_active_time_hours < 24 * 7:
+        html += '<td><abbr title="%s">less than a week ago</abbr></td>' % repo['pushed_at']
+    elif last_active_time_hours < 24 * 14:
+        html += '<td><abbr title="%s">less than two weeks ago</abbr></td>' % repo['pushed_at']
+    else:
+        html += '<td class="fail"><abbr title="%s">more that two weeks ago</abbr></td>' % repo['pushed_at']
+
     html += '</tr>'
 
 html += '''
@@ -86,5 +102,5 @@ html += '''
 </html>
 ''' % time.strftime('%b %d at %H:%M %Z')
 
-with open('/opt/ica0002/pub/index.html', 'w') as f:
+with open('/opt/ica0002/pub/students.html', 'w') as f:
     f.write(html)
