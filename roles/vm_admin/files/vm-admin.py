@@ -51,7 +51,8 @@ def get_vms():
         # Skip VMs that do not have an IP address
         if not 'internal_ips' in vm or not vm['internal_ips']:
             continue
-
+        if not vm['internal_ips'][0]:
+            continue
         ip = vm['internal_ips'][0]
         vm_id = ip.split('.')[-1]
         vms.append({
@@ -72,7 +73,7 @@ def print_vms(vms, student='all'):
         student_vms = extract_student_vms(vms, student)
         print('\nStudent %s VMs:' % student)
         for vm in student_vms:
-            print('  - name: %s   ip: %s   ssh_port: %s   public_url: %s' % (vm['name'], vm['ip'], vm['ssh_port'], vm['public_url']))
+            print('  - name: %s   ip: %s   ssh_access: %s   public_url: %s' % (vm['name'], vm['ip'], vm['ssh_port'], vm['public_url']))
 
 
 def create_vm(student, id):
