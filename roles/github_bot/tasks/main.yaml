@@ -2,7 +2,7 @@
   - name: Install GitHub Bot
     copy:
       src: github-bot.py
-      dest: /opt/ica0002/bin/github-bot
+      dest: /usr/local/bin/github-bot
       mode: 0755
 
   - name: Configure GitHub bot
@@ -13,6 +13,6 @@
 
   - name: Schedule GitHub bot to run in Cron
     copy:
-      content: "* * * * * root /opt/ica0002/bin/github-bot\n"
+      content: "* * * * * root /usr/local/bin/github-bot\n"
       dest: /etc/cron.d/github-bot
       mode: 0644

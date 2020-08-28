@@ -17,6 +17,7 @@ base_url = 'https://api.etais.ee/api'
 project_id = '22d7e03a0d654f98bd45cafd592ce8a2'
 vm1_public_ip = '193.40.156.86'
 
+
 def extract_student_vms(vms, student):
     student_vms = []
 
@@ -49,18 +50,17 @@ def get_vms():
             continue
 
         # Skip VMs that do not have an IP address
-        if not 'internal_ips' in vm or not vm['internal_ips']:
+        if not 'internal_ips' in vm or not vm['internal_ips'] or not vm['internal_ips'][0]:
             continue
-        if not vm['internal_ips'][0]:
-            continue
+
         ip = vm['internal_ips'][0]
         vm_id = ip.split('.')[-1]
         vms.append({
             'description': vm['description'],
             'ip': ip,
             'name': vm['name'],
+            'public_ssh': '%s:%s22' % (vm1_public_ip, vm_id),
             'public_url': 'http://%s:%s80' % (vm1_public_ip, vm_id),
-            'ssh_port': '%s:%s22' % (vm1_public_ip, vm_id),
             'uuid': vm['uuid'],
         })
 
@@ -73,7 +73,7 @@ def print_vms(vms, student='all'):
         student_vms = extract_student_vms(vms, student)
         print('\nStudent %s VMs:' % student)
         for vm in student_vms:
-            print('  - name: %s   ip: %s   ssh_access: %s   public_url: %s' % (vm['name'], vm['ip'], vm['ssh_port'], vm['public_url']))
+            print('  - name: %s   ip: %s   public_ssh: %s   public_url: %s' % (vm['name'], vm['ip'], vm['public_ssh'], vm['public_url']))
 
 
 def create_vm(student, id):
@@ -148,18 +148,18 @@ def write_html(vms):
     <html>
         <head>
             <meta http-equiv="refresh" content="30">
-            <title>ICA0002 2020 VMs</title>
+            <title>VMs - ICA0002 2020</title>
             <link rel="stylesheet" type="text/css" href="style.css">
         </head>
         <body>
-            <h1>ICA0002 2020 VMs</h1>
+            <h1><a href="/">ICA0002 2020</a> &raquo; VMs</h1>
             <table>
                 <tr>
                     <th>GitHub user</th>
                     <th>VM names</th>
                     <th>VM IPs</th>
-                    <th>VM SSH access</th>
-                    <th>VM public URLs</th>
+                    <th>Public SSH</th>
+                    <th>Public URLs</th>
                 </tr>
     '''
 
@@ -173,7 +173,7 @@ def write_html(vms):
         for vm in student_vms:
             vm_ips.append(vm['ip'])
             vm_names.append(vm['name'])
-            vm_ssh_ports.append(vm['ssh_port'])
+            vm_ssh_ports.append(vm['public_ssh'])
             vm_urls.append('<a href="%s">%s</a>' % (vm['public_url'], vm['public_url']))
 
         html += '<tr>'
