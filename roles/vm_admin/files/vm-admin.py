@@ -15,7 +15,7 @@ headers = {
 }
 base_url = 'https://api.etais.ee/api'
 project_id = '22d7e03a0d654f98bd45cafd592ce8a2'
-
+vm1_public_ip = '193.40.156.86'
 
 def extract_student_vms(vms, student):
     student_vms = []
@@ -58,8 +58,8 @@ def get_vms():
             'description': vm['description'],
             'ip': ip,
             'name': vm['name'],
-            'public_url': 'http://193.40.156.86:%s80' % vm_id,
-            'ssh_port': '%s22' % vm_id,
+            'public_url': 'http://%s:%s80' % (vm1_public_ip, vm_id),
+            'ssh_port': '%s:%s22' % (vm1_public_ip, vm_id),
             'uuid': vm['uuid'],
         })
 
@@ -157,7 +157,7 @@ def write_html(vms):
                     <th>GitHub user</th>
                     <th>VM names</th>
                     <th>VM IPs</th>
-                    <th>VM SSH ports</th>
+                    <th>VM SSH access</th>
                     <th>VM public URLs</th>
                 </tr>
     '''
