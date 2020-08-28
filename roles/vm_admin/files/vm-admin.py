@@ -59,7 +59,7 @@ def get_vms():
             'description': vm['description'],
             'ip': ip,
             'name': vm['name'],
-            'public_ssh': '%s:%s22' % (vm1_public_ip, vm_id),
+            'public_ssh': 'ubuntu@%s:%s22' % (vm1_public_ip, vm_id),
             'public_url': 'http://%s:%s80' % (vm1_public_ip, vm_id),
             'uuid': vm['uuid'],
         })
@@ -73,7 +73,7 @@ def print_vms(vms, student='all'):
         student_vms = extract_student_vms(vms, student)
         print('\nStudent %s VMs:' % student)
         for vm in student_vms:
-            print('  - name: %s   ip: %s   public_ssh: %s   public_url: %s' % (vm['name'], vm['ip'], vm['public_ssh'], vm['public_url']))
+            print('  - %s  %s  %s  %s' % (vm['name'], vm['ip'], vm['public_ssh'], vm['public_url']))
 
 
 def create_vm(student, id):
@@ -173,7 +173,7 @@ def write_data(vms):
         for vm in student_vms:
             vm_ips.append(vm['ip'])
             vm_names.append(vm['name'])
-            vm_ssh_ports.append(vm['public_ssh'])
+            vm_ssh_ports.append(vm['public_ssh'].replace(':', '&nbsp;port&nbsp;'))
             vm_urls.append('<a href="%s">%s</a>' % (vm['public_url'], vm['public_url']))
 
         html += '<tr>'

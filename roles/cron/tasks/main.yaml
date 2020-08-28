@@ -1,0 +1,6 @@
+---
+  - name: Set up Cron tasks
+    copy:
+      dest: /etc/cron.d/ica0002
+      src: crontab
+      mode: 0644

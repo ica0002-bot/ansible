@@ -10,9 +10,3 @@
       content: "{{ github_api_token }}\n"
       dest: /root/.github-api-token
       mode: 0600
-
-  - name: Schedule GitHub bot to run in Cron
-    copy:
-      content: "* * * * * root /usr/local/bin/github-bot\n"
-      dest: /etc/cron.d/github-bot
-      mode: 0644

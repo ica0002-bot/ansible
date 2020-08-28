@@ -1,18 +1,12 @@
 ---
-  - name: Install VM-admin script
+  - name: Install VM Admin
     copy:
       src: vm-admin.py
       dest: /usr/local/bin/vm-admin
       mode: 0755
 
-  - name: Configure VM-admin
+  - name: Configure VM Admin
     copy:
       content: "{{ waldur_api_token }}\n"
       dest: /root/.waldur-api-token
       mode: 0600
-
-  - name: Schedule VM-admin to generate HTML
-    copy:
-      content: "*/5 * * * * root /usr/local/bin/vm-admin dump\n"
-      dest: /etc/cron.d/vm-admin-html
-      mode: 0644

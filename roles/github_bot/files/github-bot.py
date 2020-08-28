@@ -27,12 +27,14 @@ for raw_repo in r.json():
         continue
 
     repo = {
+        'full_name': raw_repo['full_name'],
         'name': raw_repo['name'],
         'owner_key_added': False,
         'owner_login': raw_repo['owner']['login'],
         'owner_url': raw_repo['owner']['html_url'],
         'private': raw_repo['private'],
         'pushed_at': raw_repo['pushed_at'],
+        'ready': False,
         'url': raw_repo['html_url'],
     }
 
@@ -41,6 +43,9 @@ for raw_repo in r.json():
     r = requests.get(key_url)
     if r.text.startswith('ssh-'):
         repo['owner_key_added'] = True
+
+    if repo['private'] and repo['owner_key_added']:
+        repo['ready'] = True
 
     repos.append(repo)
 
@@ -69,8 +74,6 @@ html = '''
 now = int(time.time())
 
 for repo in repos:
-    ready = True
-
     html += '<tr>'
     html += '<td><a href="%s">%s</a></td>' % (repo['owner_url'], repo['owner_login'])
     html += '<td><a href="%s">%s</a></td>' % (repo['url'], repo['name'])
@@ -79,18 +82,16 @@ for repo in repos:
         html += '<td class="ok">Yes</td>'
     else:
         html += '<td class="fail">No</td>'
-        ready = False
 
     if repo['owner_key_added']:
         html += '<td class="ok">Yes</td>'
     else:
         html += '<td class="fail">No</td>'
-        ready = False
 
-    if ready:
+    if repo['ready']:
         html += '<td class="ok">All set up</td>'
     else:
-        html += '<td class="fail">In prgress</td>'
+        html += '<td class="fail">In progress...</td>'
 
     # We'll enable that after week 2 or smth.
     #last_active_time_hours = (now - int(time.mktime(time.strptime(repo['pushed_at'], '%Y-%m-%dT%H:%M:%SZ')))) / 3600
@@ -121,3 +122,11 @@ with open('/opt/ica0002/pub/students.html', 'w') as f:
 repo_owners = sorted([r['owner_login'] for r in repos])
 with open('/opt/ica0002/data/students-with-github-set-up.txt', 'w') as f:
     f.write('\n'.join(repo_owners) + '\n')
+
+# Dump list of GitHub repos
+ready_repos = []
+for repo in repos:
+    if repo['ready']:
+        ready_repos.append(repo['full_name'])
+with open('/opt/ica0002/data/github-repos.txt', 'w') as f:
+    f.write('\n'.join(ready_repos) + '\n')
