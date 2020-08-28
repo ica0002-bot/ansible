@@ -138,12 +138,12 @@ def print_help():
 
       Options:
         all                 - print all known student VMs
-        html                - generate HTML page
+        dump                - generate HTML page
         <student_name>      - print list of VMs for given student
         <student_name> <n>  - create/delete VMs for given student''' % sys.argv[0])
 
 
-def write_html(vms):
+def write_data(vms):
     html = '''
     <html>
         <head>
@@ -194,6 +194,9 @@ def write_html(vms):
     with open('/opt/ica0002/pub/vms.html', 'w') as f:
         f.write(html)
 
+    with open('/opt/ica0002/data/students-with-vms.txt', 'w') as f:
+        f.write('\n'.join(students) + '\n')
+
 
 if len(sys.argv) <= 1:
     print_help()
@@ -201,8 +204,8 @@ if len(sys.argv) <= 1:
 
 vms = get_vms()
 
-if sys.argv[1] == 'html':
-    write_html(vms)
+if sys.argv[1] == 'dump':
+    write_data(vms)
 elif len(sys.argv) == 2:
     print_vms(vms, student=sys.argv[1])
 else:
