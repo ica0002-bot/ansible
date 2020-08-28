@@ -10,118 +10,178 @@ with open('/root/.waldur-api-token') as f:
     token = f.readlines()[0].strip()
 
 headers = {
-    "Authorization": "token %s" % token,
-    "Content-Type": "application/json"
+    'Authorization': 'token %s' % token,
+    'Content-Type': 'application/json',
 }
 base_url = 'https://api.etais.ee/api'
-r = requests.get('%s/openstacktenant-instances/?project=22d7e03a0d654f98bd45cafd592ce8a2' % base_url, headers=headers)
-raw_vm_list = r.json()
+project_id = '22d7e03a0d654f98bd45cafd592ce8a2'
+vm1_public_ip = '193.40.156.86'
 
 
-def get_student_vms(student):
-    print('Student: %s' % student)
+def extract_student_vms(vms, student):
     student_vms = []
+
+    for vm in vms:
+        if vm['description'] == student:
+            student_vms.append(vm)
+
+    return student_vms
+
+
+def extract_students(vms):
+    students = []
+
+    for vm in vms:
+        if not vm['description'] in students:
+            students.append(vm['description'])
+
+    return sorted(students)
+
+
+def get_vms():
+    vms = []
+
+    print('Retrieveing list of VMs from Waldur...')
+    r = requests.get('%s/openstacktenant-instances/?project=%s' % (base_url, project_id), headers=headers)
+    raw_vm_list = r.json()
     for vm in raw_vm_list:
-        if vm['description'] != student:
+        # Skip VMs with empty description
+        if 'description' not in vm or not vm['description']:
             continue
-        if 'internal_ips' in vm:
-            student_vms.append(','.join(vm['internal_ips']))
-    print('VMs: %s' % ', '.join(student_vms))
+
+        # Skip VMs that do not have an IP address
+        if not 'internal_ips' in vm or not vm['internal_ips'] or not vm['internal_ips'][0]:
+            continue
+
+        ip = vm['internal_ips'][0]
+        vm_id = ip.split('.')[-1]
+        vms.append({
+            'description': vm['description'],
+            'ip': ip,
+            'name': vm['name'],
+            'public_ssh': '%s:%s22' % (vm1_public_ip, vm_id),
+            'public_url': 'http://%s:%s80' % (vm1_public_ip, vm_id),
+            'uuid': vm['uuid'],
+        })
+
+    return vms
+
+
+def print_vms(vms, student='all'):
+    students = extract_students(vms) if student == 'all' else [student]
+    for student in students:
+        student_vms = extract_student_vms(vms, student)
+        print('\nStudent %s VMs:' % student)
+        for vm in student_vms:
+            print('  - name: %s   ip: %s   public_ssh: %s   public_url: %s' % (vm['name'], vm['ip'], vm['public_ssh'], vm['public_url']))
 
 
 def create_vm(student, id):
+    print('Creating VM %s for %s...' % (id, student))
+
     payload = {
-        "offering": "https://api.etais.ee/api/marketplace-offerings/b8a3f21d92d9411a89315ab727340471/",
-        "project": "https://api.etais.ee/api/projects/22d7e03a0d654f98bd45cafd592ce8a2/",
-        "attributes": {
-            "name": "%s-%s" % (student, id),
-            "description": "%s" % student,
-            "image": "https://api.etais.ee/api/openstacktenant-images/7054bc7140894afc91af6b84c13a3798/",
-            "flavor": "https://api.etais.ee/api/openstacktenant-flavors/fa67a49065274d3e8b6b1dcf80130236/",
-            "ssh_public_key": "https://api.etais.ee/api/keys/c630a307be5b4b9a988afac723ea1a0b/",
-            "security_groups": [{"url":"https://api.etais.ee/api/openstacktenant-security-groups/70bdb790eb854be6b596bfdf4a4a572d/"}],
-            "internal_ips_set": [{"subnet":"https://api.etais.ee/api/openstacktenant-subnets/850dbada4f1443abac5b10ce5bf3cfbc/"}],
-            "floating_ips":[],
-            "system_volume_size": 10240,
-            "system_volume_type": "https://api.etais.ee/api/openstacktenant-volume-types/c388cd0b264c4878a97c1a175d4eef9c/",
-            "data_volume_type": "https://api.etais.ee/api/openstacktenant-volume-types/c388cd0b264c4878a97c1a175d4eef9c/"
+        'offering': 'https://api.etais.ee/api/marketplace-offerings/b8a3f21d92d9411a89315ab727340471/',
+        'project': 'https://api.etais.ee/api/projects/%s/' % project_id,
+        'attributes': {
+            'name': '%s-%s' % (student, id),
+            'description': student,
+            'image': 'https://api.etais.ee/api/openstacktenant-images/7054bc7140894afc91af6b84c13a3798/',
+            'flavor': 'https://api.etais.ee/api/openstacktenant-flavors/fa67a49065274d3e8b6b1dcf80130236/',
+            'ssh_public_key': 'https://api.etais.ee/api/keys/6ecc7a9f69514c49b076d68245ac66b5/',
+            'security_groups': [{
+                'url': 'https://api.etais.ee/api/openstacktenant-security-groups/70bdb790eb854be6b596bfdf4a4a572d/',
+            }],
+            'internal_ips_set': [{
+                'subnet': 'https://api.etais.ee/api/openstacktenant-subnets/850dbada4f1443abac5b10ce5bf3cfbc/',
+            }],
+            'floating_ips': [],
+            'system_volume_size': 10240,
+            'system_volume_type': 'https://api.etais.ee/api/openstacktenant-volume-types/c388cd0b264c4878a97c1a175d4eef9c/',
+            'data_volume_type': 'https://api.etais.ee/api/openstacktenant-volume-types/c388cd0b264c4878a97c1a175d4eef9c/',
         }
     }
-    r = requests.post('%s/marketplace-cart-items/' % base_url, headers=headers, data=json.dumps(payload))
-    print(r.json())
+    requests.post('%s/marketplace-cart-items/' % base_url, headers=headers, data=json.dumps(payload))
+
     payload = {
-        "project": "https://api.etais.ee/api/projects/22d7e03a0d654f98bd45cafd592ce8a2/"
+        'project': 'https://api.etais.ee/api/projects/%s/' % project_id,
     }
-    r = requests.post('%s/marketplace-cart-items/submit/' % base_url, headers=headers, data=json.dumps(payload))
-    print(r.json())
+    requests.post('%s/marketplace-cart-items/submit/' % base_url, headers=headers, data=json.dumps(payload))
 
 
 def delete_vm(vm_id):
-    r = requests.delete('%s/openstacktenant-instances/%s/force_destroy/?delete_volumes=true&release_floating_ips=true' % (base_url, vm_id), headers=headers)
+    requests.delete('%s/openstacktenant-instances/%s/force_destroy/?delete_volumes=true&release_floating_ips=true' % (base_url, vm_id), headers=headers)
 
 
-def adjust_student_vms(student, vm_count):
-    student_vms = []
-    for vm in raw_vm_list:
-        if vm['description'] == student:
-            student_vms.append(vm)
-    print('Student %s has %d VMs, desired: %d' % (student, len(student_vms), vm_count))
-    if len(student_vms) == vm_count:
-        print('Ok')
-    if len(student_vms) > vm_count:
-        print('Deleting %d VMs' % (len(student_vms) - int(vm_count)))
-        for i in range(int(vm_count), len(student_vms)):
-            print('Deleting %s' % student_vms[i]['name'])
+def adjust_vm_count(vms, student, vm_count):
+    if not 0 <= vm_count <= 3:
+        print('ERROR: allowed VM counts are 0, 1, 2 and 3.')
+        sys.exit(1)
+
+    student_vms = extract_student_vms(vms, student)
+    actual_vm_count = len(student_vms)
+    diff = abs(actual_vm_count - vm_count)
+
+    print('Student %s has %d VMs, desired: %d' % (student, actual_vm_count, vm_count))
+    if actual_vm_count > vm_count:
+        for i in range(int(vm_count), actual_vm_count):
+            print('Deleting VM %s...' % student_vms[i]['name'])
             delete_vm(student_vms[i]['uuid'])
-    if len(student_vms) < vm_count:
-        print('Creating %d VMs' % (int(vm_count) - len(student_vms)))
-        for i in range(len(student_vms) + 1, int(vm_count) + 1):
-            create_vm(student, i)
+    elif actual_vm_count < vm_count:
+        for i in range(actual_vm_count, int(vm_count)):
+            create_vm(student, i + 1)
+
+    print('All good.')
 
 
 def print_help():
     print('''Usage: %s <options>
 
       Options:
-        html - generate html page
-        <student_name> - print list of VMs for given student
-        <student_name> <n> - crete/delete VMs for given student''' % sys.argv[0])
+        all                 - print all known student VMs
+        html                - generate HTML page
+        <student_name>      - print list of VMs for given student
+        <student_name> <n>  - create/delete VMs for given student''' % sys.argv[0])
 
 
-def write_html():
-    student_list = []
-    for vm in raw_vm_list:
-        if not vm['description'] in student_list and vm['description']:
-            student_list.append(vm['description'])
-
-    # Compose HTML
+def write_html(vms):
     html = '''
     <html>
         <head>
             <meta http-equiv="refresh" content="30">
-            <title>ICA0002 VMs</title>
+            <title>VMs - ICA0002 2020</title>
             <link rel="stylesheet" type="text/css" href="style.css">
         </head>
         <body>
-            <h1>ICA0002 VMs</h1>
+            <h1><a href="/">ICA0002 2020</a> &raquo; VMs</h1>
             <table>
                 <tr>
                     <th>GitHub user</th>
+                    <th>VM names</th>
                     <th>VM IPs</th>
+                    <th>Public SSH</th>
+                    <th>Public URLs</th>
                 </tr>
     '''
 
-    for student in student_list:
-        student_ips = []
-        for vm in raw_vm_list:
-            if vm['description'] != student:
-                continue
-            if 'internal_ips' in vm and vm['internal_ips']:
-                student_ips.append(vm['internal_ips'][0])
+    students = extract_students(vms)
+    for student in students:
+        vm_ips = []
+        vm_names = []
+        vm_ssh_ports = []
+        vm_urls = []
+        student_vms = extract_student_vms(vms, student)
+        for vm in student_vms:
+            vm_ips.append(vm['ip'])
+            vm_names.append(vm['name'])
+            vm_ssh_ports.append(vm['public_ssh'])
+            vm_urls.append('<a href="%s">%s</a>' % (vm['public_url'], vm['public_url']))
 
         html += '<tr>'
-        html += '<td>%s</td>' % (student)
-        html += '<td>%s</td>' % ('<br>'.join(student_ips))
+        html += '<td><a href="https://github.com/%s">%s</a></td>' % (student, student)
+        html += '<td>%s</td>' % ('<br>'.join(vm_names))
+        html += '<td>%s</td>' % ('<br>'.join(vm_ips))
+        html += '<td>%s</td>' % ('<br>'.join(vm_ssh_ports))
+        html += '<td>%s</td>' % ('<br>'.join(vm_urls))
         html += '</tr>'
 
     html += '''
@@ -138,9 +198,12 @@ def write_html():
 if len(sys.argv) <= 1:
     print_help()
     sys.exit(1)
-elif sys.argv[1] == 'html':
-    write_html()
+
+vms = get_vms()
+
+if sys.argv[1] == 'html':
+    write_html(vms)
 elif len(sys.argv) == 2:
-    get_student_vms(sys.argv[1])
+    print_vms(vms, student=sys.argv[1])
 else:
-    adjust_student_vms(sys.argv[1], int(sys.argv[2]))
+    adjust_vm_count(vms, sys.argv[1], int(sys.argv[2]))
