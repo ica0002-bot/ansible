@@ -116,3 +116,8 @@ html += '''
 
 with open('/opt/ica0002/pub/students.html', 'w') as f:
     f.write(html)
+
+# Dump list of repo owners
+repo_owners = sorted([r['owner_login'] for r in repos])
+with open('/opt/ica0002/data/students-with-github-set-up.txt', 'w') as f:
+    f.write('\n'.join(repo_owners) + '\n')

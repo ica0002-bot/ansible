@@ -13,6 +13,6 @@
 
   - name: Schedule VM-admin to generate HTML
     copy:
-      content: "*/5 * * * * root /usr/local/bin/vm-admin html\n"
+      content: "*/5 * * * * root /usr/local/bin/vm-admin dump\n"
       dest: /etc/cron.d/vm-admin-html
       mode: 0644

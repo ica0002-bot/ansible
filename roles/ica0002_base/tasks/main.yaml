@@ -6,6 +6,7 @@
       mode: 0755
     loop:
       - /opt/ica0002
+      - /opt/ica0002/data
       - /opt/ica0002/pub
 
   - name: Add public pages
