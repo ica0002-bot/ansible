@@ -41,9 +41,14 @@ def extract_students(vms):
 def get_vms():
     vms = []
 
-    print('Retrieveing list of VMs from Waldur...')
+    print('Retrieving list of VMs from Waldur...')
     r = requests.get('%s/openstacktenant-instances/?project=%s' % (base_url, project_id), headers=headers)
     raw_vm_list = r.json()
+    if not isinstance(raw_vm_list, list):
+        print('ERROR: Could not get VM list from Waldur. Got this instead:')
+        print(raw_vm_list)
+        sys.exit(1)
+
     for vm in raw_vm_list:
         # Skip VMs with empty description
         if 'description' not in vm or not vm['description']:
