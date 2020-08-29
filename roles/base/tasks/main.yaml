@@ -7,7 +7,15 @@
     loop:
       - /opt/ica0002
       - /opt/ica0002/data
+      - /opt/ica0002/data/students
       - /opt/ica0002/pub
+      - /root/.ssh
+
+  - name: Configure SSH
+    copy:
+      dest: /root/.ssh/config
+      src: ssh_config
+      mode: 0644
 
   - name: Add public pages
     copy:

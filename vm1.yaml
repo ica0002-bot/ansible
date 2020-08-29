@@ -4,7 +4,9 @@
     become: yes
     roles:
       - users
-      - ica0002_base
+      - base
       - github_bot
+      - github_sucker
       - vm_admin
+      - cron
       - nginx

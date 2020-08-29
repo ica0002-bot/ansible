@@ -41,9 +41,14 @@ def extract_students(vms):
 def get_vms():
     vms = []
 
-    print('Retrieveing list of VMs from Waldur...')
+    print('Retrieving list of VMs from Waldur...')
     r = requests.get('%s/openstacktenant-instances/?project=%s' % (base_url, project_id), headers=headers)
     raw_vm_list = r.json()
+    if not isinstance(raw_vm_list, list):
+        print('ERROR: Could not get VM list from Waldur. Got this instead:')
+        print(raw_vm_list)
+        sys.exit(1)
+
     for vm in raw_vm_list:
         # Skip VMs with empty description
         if 'description' not in vm or not vm['description']:
@@ -59,7 +64,7 @@ def get_vms():
             'description': vm['description'],
             'ip': ip,
             'name': vm['name'],
-            'public_ssh': '%s:%s22' % (vm1_public_ip, vm_id),
+            'public_ssh': 'ubuntu@%s:%s22' % (vm1_public_ip, vm_id),
             'public_url': 'http://%s:%s80' % (vm1_public_ip, vm_id),
             'uuid': vm['uuid'],
         })
@@ -73,7 +78,7 @@ def print_vms(vms, student='all'):
         student_vms = extract_student_vms(vms, student)
         print('\nStudent %s VMs:' % student)
         for vm in student_vms:
-            print('  - name: %s   ip: %s   public_ssh: %s   public_url: %s' % (vm['name'], vm['ip'], vm['public_ssh'], vm['public_url']))
+            print('  - %s  %s  %s  %s' % (vm['name'], vm['ip'], vm['public_ssh'], vm['public_url']))
 
 
 def create_vm(student, id):
@@ -173,7 +178,7 @@ def write_data(vms):
         for vm in student_vms:
             vm_ips.append(vm['ip'])
             vm_names.append(vm['name'])
-            vm_ssh_ports.append(vm['public_ssh'])
+            vm_ssh_ports.append(vm['public_ssh'].replace(':', '&nbsp;port&nbsp;'))
             vm_urls.append('<a href="%s">%s</a>' % (vm['public_url'], vm['public_url']))
 
         html += '<tr>'

@@ -1,0 +1,13 @@
+---
+  - name: Install dependencies
+    apt:
+      name: "{{ item }}"
+    loop:
+      - curl
+      - git
+
+  - name: Install GitHub Sucker
+    copy:
+      src: github-sucker.sh
+      dest: /usr/local/bin/github-sucker
+      mode: 0755
