@@ -1,3 +1,4 @@
-*/15 * * * * root /usr/local/bin/github-bot
-*/15 * * * * root /usr/local/bin/github-sucker
-*/15 * * * * root /usr/local/bin/vm-admin dump
+0,15,30,45 * * * * root /usr/local/bin/github-bot
+2,17,32,47 * * * * root /usr/local/bin/github-sucker
+4,19,34,49 * * * * root /usr/local/bin/vm-admin dump
+6,21,36,51 * * * * root /usr/local/bin/vm-ssh-key all
