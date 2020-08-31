@@ -40,6 +40,13 @@ def extract_students(vms):
 
 def get_vms():
     vms = []
+    vms_with_keys = []
+
+    print('Retrieving SSH key info...')
+    with open('/opt/ica0002/data/vms-with-student-key-added.txt') as f:
+        raw_vm_list = f.readlines()
+    for vm in raw_vm_list:
+        vms_with_keys.append(vm.strip().split(':')[0])
 
     print('Retrieving list of VMs from Waldur...')
     r = requests.get('%s/openstacktenant-instances/?project=%s' % (base_url, project_id), headers=headers)
@@ -60,11 +67,16 @@ def get_vms():
 
         ip = vm['internal_ips'][0]
         vm_id = ip.split('.')[-1]
+        if ip in vms_with_keys:
+            public_ssh = 'ubuntu@%s:%s22' % (vm1_public_ip, vm_id)
+        else:
+            public_ssh = 'student_key_not_added_yet'
+
         vms.append({
             'description': vm['description'],
             'ip': ip,
             'name': vm['name'],
-            'public_ssh': 'ubuntu@%s:%s22' % (vm1_public_ip, vm_id),
+            'public_ssh': public_ssh,
             'public_url': 'http://%s:%s80' % (vm1_public_ip, vm_id),
             'uuid': vm['uuid'],
         })
@@ -178,7 +190,7 @@ def write_data(vms):
         for vm in student_vms:
             vm_ips.append(vm['ip'])
             vm_names.append(vm['name'])
-            vm_ssh_ports.append(vm['public_ssh'].replace(':', '&nbsp;port&nbsp;'))
+            vm_ssh_ports.append(vm['public_ssh'].replace(':', ' port ').replace('student_key_not_added_yet', 'Still creating...'))
             vm_urls.append('<a href="%s">%s</a>' % (vm['public_url'], vm['public_url']))
 
         html += '<tr>'
