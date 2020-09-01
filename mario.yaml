@@ -1,0 +1,37 @@
+---
+  - name: Configure Web-Mario
+    hosts: romankuchin-1
+    become: yes
+    tasks:
+      - name: Required packages
+        apt:
+          name:
+            - docker.io
+            - nginx
+            - python3-pip
+          update_cache: yes
+
+      - name: Required libraries
+        pip:
+          name: docker-py
+      
+      - name: Mario container
+        docker_container:
+          name: mario
+          image: krystism/super_mario_crossover:3.1.21
+          state: started
+          ports:
+            - "8080:80"
+      
+      - name: Reverse proxy config
+        template:
+          src: nginx_config_demo.j2
+          dest: /etc/nginx/sites-enabled/default
+        notify:
+          - Restart nginx
+
+    handlers:
+      - name: Restart nginx
+        service:
+          name: nginx
+          state: restarted
