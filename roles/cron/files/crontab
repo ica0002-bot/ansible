@@ -1,14 +1,16 @@
-# Jobs during class times
-* 17-20 * * 2,3 root /usr/local/bin/github-bot
-* 17-20 * * 2,3 root sleep 10; /usr/local/bin/student-vms 1
-* 17-20 * * 2,3 root sleep 30; /usr/local/bin/vm-admin dump
+# !!! Make sure to update times on DST change !!!
+
+# Jobs during class times: Tue + Wed -- 16:00..20:59
+* 13-17 * * 2,3 root /usr/local/bin/github-bot
+* 13-17 * * 2,3 root sleep 10; /usr/local/bin/student-vms 1
+* 13-17 * * 2,3 root sleep 30; /usr/local/bin/vm-admin dump
 
 */5 17-20 * * 2,3 /usr/local/bin/vm-ssh-keys all
 
-# Jobs outside of class times
-00 2,8,14,22 * * * root /usr/local/bin/github-bot
-11 2,8,14,22 * * * root /usr/local/bin/github-sucker get keys
-22 2,8,14,22 * * * root /usr/local/bin/student-vms 1
-33 2,8,14,22 * * * root /usr/local/bin/vm-ssh-keys all
-44 2,8,14,22 * * * root /usr/local/bin/vm-admin dump
-55 2,8,14,22 * * * root /usr/local/bin/github-sucker get repos
+# Jobs outside of class times: daily -- 03:xx, 09:xx, 15:xx, 21:xx
+00 */6 * * * root /usr/local/bin/github-bot
+11 */6 * * * root /usr/local/bin/github-sucker get keys
+22 */6 * * * root /usr/local/bin/student-vms 1
+33 */6 * * * root /usr/local/bin/vm-ssh-keys all
+44 */6 * * * root /usr/local/bin/vm-admin dump
+55 */6 * * * root /usr/local/bin/github-sucker get repos
