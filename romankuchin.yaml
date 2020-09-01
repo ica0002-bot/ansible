@@ -8,6 +8,7 @@
           name:
             - docker.io
             - python3-pip
+          update_cache: yes
 
       - name: Prepare libraries
         pip:
