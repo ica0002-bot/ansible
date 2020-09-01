@@ -3,7 +3,7 @@
     hosts: romankuchin-1
     become: yes
     tasks:
-      - name: Prepare packages
+      - name: Required packages
         apt:
           name:
             - docker.io
@@ -11,11 +11,11 @@
             - python3-pip
           update_cache: yes
 
-      - name: Prepare libraries
+      - name: Required libraries
         pip:
           name: docker-py
       
-      - name: Run mario
+      - name: Mario container
         docker_container:
           name: mario
           image: krystism/super_mario_crossover:3.1.21
@@ -23,7 +23,7 @@
           ports:
             - "8080:80"
       
-      - name: Configure reverse proxy
+      - name: Reverse proxy config
         template:
           src: nginx_config_demo.j2
           dest: /etc/nginx/sites-enabled/default
