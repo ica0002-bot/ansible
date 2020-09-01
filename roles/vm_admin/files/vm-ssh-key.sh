@@ -21,6 +21,8 @@ add_ssh_key() {
         return 1
     fi
 
+    ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$vm_ip"
+
     if ssh "$vm_ip" cat .ssh/authorized_keys | grep -q "$key"; then
         print_info "$user public SSH key is already added to $vm_ip."
     else

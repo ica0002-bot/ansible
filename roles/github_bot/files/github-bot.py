@@ -118,15 +118,17 @@ html += '''
 with open('/opt/ica0002/pub/students.html', 'w') as f:
     f.write(html)
 
-# Dump list of repo owners
-repo_owners = sorted([r['owner_login'] for r in repos])
-with open('/opt/ica0002/data/students-with-github-set-up.txt', 'w') as f:
-    f.write('\n'.join(repo_owners) + '\n')
-
-# Dump list of GitHub repos
+# Dump list of GitHub repos and repo owners
+ready_repo_owners = []
 ready_repos = []
+
 for repo in repos:
     if repo['ready']:
+        ready_repo_owners.append(repo['owner_login'])
         ready_repos.append(repo['full_name'])
+
+with open('/opt/ica0002/data/students-with-github-set-up.txt', 'w') as f:
+    f.write('\n'.join(ready_repo_owners) + '\n')
+
 with open('/opt/ica0002/data/github-repos.txt', 'w') as f:
     f.write('\n'.join(ready_repos) + '\n')

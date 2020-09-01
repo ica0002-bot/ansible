@@ -9,7 +9,7 @@
 * 13-17 * * 2,3 root sleep 10; /usr/local/bin/student-vms 1
 * 13-17 * * 2,3 root sleep 30; /usr/local/bin/vm-admin dump
 
-*/5 17-20 * * 2,3 root /usr/local/bin/vm-ssh-keys all
+*/5 17-20 * * 2,3 root /usr/local/bin/vm-ssh-key all
 
 #
 # Jobs outside of class times
@@ -22,5 +22,5 @@
 # Adjust VMs, sync keys and repos: every 6 hours
 05 */6 * * * root /usr/local/bin/student-vms 1
 10 */6 * * * root /usr/local/bin/github-sucker get keys
-20 */6 * * * root /usr/local/bin/vm-ssh-keys all
+20 */6 * * * root /usr/local/bin/vm-ssh-key all
 25 */6 * * * root /usr/local/bin/github-sucker get repos
