@@ -1,4 +1,14 @@
-0,15,30,45 * * * * root /usr/local/bin/github-bot
-2,17,32,47 * * * * root /usr/local/bin/github-sucker
-4,19,34,49 * * * * root /usr/local/bin/vm-admin dump
-6,21,36,51 * * * * root /usr/local/bin/vm-ssh-key all
+# Jobs during class times
+* 17-20 * * 2,3 root /usr/local/bin/github-bot
+* 17-20 * * 2,3 root sleep 10; /usr/local/bin/student-vms 1
+* 17-20 * * 2,3 root sleep 30; /usr/local/bin/vm-admin dump
+
+*/5 17-20 * * 2,3 /usr/local/bin/vm-ssh-keys all
+
+# Jobs outside of class times
+00 2,8,14,22 * * * root /usr/local/bin/github-bot
+11 2,8,14,22 * * * root /usr/local/bin/github-sucker get keys
+22 2,8,14,22 * * * root /usr/local/bin/student-vms 1
+33 2,8,14,22 * * * root /usr/local/bin/vm-ssh-keys all
+44 2,8,14,22 * * * root /usr/local/bin/vm-admin dump
+55 2,8,14,22 * * * root /usr/local/bin/github-sucker get repos
