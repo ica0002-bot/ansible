@@ -19,9 +19,11 @@ tr:nth-child(odd) {
 
 .index-item {
     border: 1px solid #eee;
+    margin: 1em 0;
     padding: 1em;
     text-align: center;
-    width: 99%;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .fail {
