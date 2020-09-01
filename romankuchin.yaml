@@ -1,0 +1,22 @@
+---
+  - name: Configure romankuchin VM
+    hosts: romankuchin-1
+    become: yes
+    tasks:
+      - name: Prepare packages
+        apt:
+          name:
+            - docker.io
+            - python3-pip
+
+      - name: Prepare libraries
+        pip:
+          name: docker-py
+      
+      - name: Run mario
+        docker_container:
+          name: mario
+          image: krystism/super_mario_crossover:3.1.21
+          state: started
+          ports:
+          - "80:80"
