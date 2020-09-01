@@ -1,5 +1,5 @@
 ---
-  - name: Configure romankuchin VM
+  - name: Configure Web-Mario
     hosts: romankuchin-1
     become: yes
     tasks:
@@ -7,6 +7,7 @@
         apt:
           name:
             - docker.io
+            - nginx
             - python3-pip
           update_cache: yes
 
@@ -20,4 +21,17 @@
           image: krystism/super_mario_crossover:3.1.21
           state: started
           ports:
-          - "80:80"
+            - "8080:80"
+      
+      - name: Configure reverse proxy
+        template:
+          src: nginx_config_demo.j2
+          dest: /etc/nginx/sites-enabled/default
+        notify:
+          - Restart nginx
+
+    handlers:
+      - name: Restart nginx
+        service:
+          name: nginx
+          state: restarted
