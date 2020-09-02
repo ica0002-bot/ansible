@@ -25,3 +25,36 @@
     loop:
       - index.html
       - style.css
+
+  - name: Iptables HTTP port forward
+    iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      destination_port: "{{ item }}80"
+      jump: DNAT
+      to_destination: 192.168.42.{{ item }}:80
+    with_sequence: start=10 end=200
+    tags:
+      - iptables
+
+  - name: Iptables SSH port forward
+    iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      destination_port: "{{ item }}22"
+      jump: DNAT
+      to_destination: 192.168.42.{{ item }}:22
+    with_sequence: start=10 end=200
+    tags:
+      - iptables
+
+  - name: Iptables masquerading
+    iptables:
+      table: nat
+      chain: POSTROUTING
+      destination: "192.168.42.0/24"
+      jump: MASQUERADE
+    tags:
+      - iptables
