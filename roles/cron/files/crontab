@@ -21,6 +21,6 @@
 
 # Adjust VMs, sync keys and repos: every 6 hours
 05 */6 * * * root /usr/local/bin/student-vms 1
-10 */6 * * * root /usr/local/bin/github-sucker get keys
+10 */6 * * * root /usr/local/bin/github-sucker update keys
 20 */6 * * * root /usr/local/bin/vm-ssh-key all
-25 */6 * * * root /usr/local/bin/github-sucker get repos
+25 */6 * * * root /usr/local/bin/github-sucker update repos
