@@ -51,6 +51,14 @@ for raw_repo in r.json():
 
 repos = sorted(repos, key=lambda k: k['owner_login'])
 
+ready_repo_owners = []
+ready_repos = []
+for repo in repos:
+    if repo['ready']:
+        ready_repo_owners.append(repo['owner_login'])
+        ready_repos.append(repo['full_name'])
+
+
 # Compose HTML
 html = '''
 <html>
@@ -60,7 +68,8 @@ html = '''
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
-        <h1><a href="/">ICA0002 2020</a> &raquo; Students</h1>
+        <a href="/">ICA0002 2020</a> &raquo; <a href="/students.html">Students</a>
+        <h1>ICA0002 2020 Students</h1>
         <table>
             <tr>
                 <th>GitHub user</th>
@@ -103,24 +112,18 @@ for repo in repos:
     html += '</tr>'
 
 html += '''
+            <tr><th colspan="5">Total: %d &nbsp; &middot; &nbsp; Repositories set up: %d</th>
+            </tr>
         </table>
         <div class="footer">Last checked on %s.</div>
     </body>
 </html>
-''' % time.strftime('%b %d at %H:%M %Z')
+''' % (len(repos), len(ready_repos), time.strftime('%b %d at %H:%M %Z'))
 
 with open('/opt/ica0002/pub/students.html', 'w') as f:
     f.write(html)
 
 # Dump list of GitHub repos and repo owners
-ready_repo_owners = []
-ready_repos = []
-
-for repo in repos:
-    if repo['ready']:
-        ready_repo_owners.append(repo['owner_login'])
-        ready_repos.append(repo['full_name'])
-
 with open('/opt/ica0002/data/students-with-github-set-up.txt', 'w') as f:
     f.write('\n'.join(ready_repo_owners) + '\n')
 
