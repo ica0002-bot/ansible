@@ -93,6 +93,14 @@ def print_vms(vms, student='all'):
             print('  - %s  %s  %s  %s' % (vm['name'], vm['ip'], vm['public_ssh'], vm['public_url']))
 
 
+def interpret_status_code(code):
+    if code == 200 or code == 201 or code == 202:
+        return '\033[92m[OK]\033[0m'
+    if code == 400:
+        return '\033[91m[FAIL]\033[0m'
+    return code
+
+
 def create_vm(student, id):
     print('Creating VM %s for %s...' % (id, student))
 
@@ -117,16 +125,19 @@ def create_vm(student, id):
             'data_volume_type': 'https://api.etais.ee/api/openstacktenant-volume-types/c388cd0b264c4878a97c1a175d4eef9c/',
         }
     }
-    requests.post('%s/marketplace-cart-items/' % base_url, headers=headers, data=json.dumps(payload))
+    r = requests.post('%s/marketplace-cart-items/' % base_url, headers=headers, data=json.dumps(payload))
+    print('Request to create VM. Response: %s' % interpret_status_code(r.status_code))
 
     payload = {
         'project': 'https://api.etais.ee/api/projects/%s/' % project_id,
     }
-    requests.post('%s/marketplace-cart-items/submit/' % base_url, headers=headers, data=json.dumps(payload))
+    r = requests.post('%s/marketplace-cart-items/submit/' % base_url, headers=headers, data=json.dumps(payload))
+    print('Submit request. Response: %s' % interpret_status_code(r.status_code))
 
 
 def delete_vm(vm_id):
-    requests.delete('%s/openstacktenant-instances/%s/force_destroy/?delete_volumes=true&release_floating_ips=true' % (base_url, vm_id), headers=headers)
+    r = requests.delete('%s/openstacktenant-instances/%s/force_destroy/?delete_volumes=true&release_floating_ips=true' % (base_url, vm_id), headers=headers)
+    print('Request to delete VM. Response: %s' % interpret_status_code(r.status_code))
 
 
 def adjust_vm_count(vms, student, vm_count):
@@ -226,4 +237,6 @@ if sys.argv[1] == 'dump':
 elif len(sys.argv) == 2:
     print_vms(vms, student=sys.argv[1])
 else:
-    adjust_vm_count(vms, sys.argv[1], int(sys.argv[2]))
+    for s in sys.argv[1].split(','):
+        if s:
+            adjust_vm_count(vms, s, int(sys.argv[2]))

@@ -7,7 +7,11 @@ fi
 
 vm_count="$1"
 
-for student in $(cat "/opt/ica0002/data/students-with-github-set-up.txt" | grep '.'); do
-    echo "Provisioning $vm_count VMs for $student..."
-    /usr/local/bin/vm-admin "$student" "$vm_count"
-done
+#for student in $(cat "/opt/ica0002/data/students-with-github-set-up.txt" | grep '.'); do
+#    echo "Provisioning $vm_count VMs for $student..."
+#    /usr/local/bin/vm-admin "$student" "$vm_count"
+#done
+
+student=$(cat "/opt/ica0002/data/students-with-github-set-up.txt" | grep '.' | tr '\n' ',')
+echo "Provisioning $vm_count VMs for $student..."
+/usr/local/bin/vm-admin "$student" "$vm_count"
