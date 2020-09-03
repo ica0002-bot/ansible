@@ -67,7 +67,7 @@ html = '''
                 <th>Repository</th>
                 <th>Private?</th>
                 <th>SSH key added?</th>
-                <th>Status</th>
+                <th>Latest activity</th>
             </tr>
 '''
 
@@ -88,23 +88,17 @@ for repo in repos:
     else:
         html += '<td class="fail">No</td>'
 
-    if repo['ready']:
-        html += '<td class="ok">All set up</td>'
+    latest_activity_time = time.strptime(repo['pushed_at'], '%Y-%m-%dT%H:%M:%SZ')
+    latest_activity_time_days = (now - int(time.mktime(latest_activity_time))) / 86400
+    latest_activity_time_str = time.strftime('%b %e', latest_activity_time)
+    if not repo['ready']:
+        html += '<td class="fail">---</td>'
+    elif latest_activity_time_days < 8:
+        html += '<td class="ok">%s</td>' % latest_activity_time_str
+    elif latest_activity_time_days < 15:
+        html += '<td>%s</td>' % latest_activity_time_str
     else:
-        html += '<td class="fail">In progress...</td>'
-
-    # We'll enable that after week 2 or smth.
-    #last_active_time_hours = (now - int(time.mktime(time.strptime(repo['pushed_at'], '%Y-%m-%dT%H:%M:%SZ')))) / 3600
-    #if last_active_time_hours < 1:
-    #    html += '<td class="ok"><abbr title="%s">less than an hour ago</abbr></td>' % repo['pushed_at']
-    #elif last_active_time_hours < 24:
-    #    html += '<td class="ok"><abbr title="%s">less than a day ago</abbr></td>' % repo['pushed_at']
-    #elif last_active_time_hours < 24 * 7:
-    #    html += '<td><abbr title="%s">less than a week ago</abbr></td>' % repo['pushed_at']
-    #elif last_active_time_hours < 24 * 14:
-    #    html += '<td><abbr title="%s">less than two weeks ago</abbr></td>' % repo['pushed_at']
-    #else:
-    #    html += '<td class="fail"><abbr title="%s">more that two weeks ago</abbr></td>' % repo['pushed_at']
+        html += '<td class="fail">%s</td>' % latest_activity_time_str
 
     html += '</tr>'
 
