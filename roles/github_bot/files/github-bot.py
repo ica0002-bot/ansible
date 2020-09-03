@@ -19,7 +19,7 @@ for invitation in r.json():
 # Check for repositories
 repos = []
 
-url = 'https://api.github.com/user/repos?access_token=%s' % token
+url = 'https://api.github.com/user/repos?access_token=%s&per_page=100' % token
 r = requests.get(url)
 for raw_repo in r.json():
     # Skip own repos
