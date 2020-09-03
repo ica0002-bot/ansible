@@ -29,7 +29,7 @@ for raw_repo in r.json():
     repo = {
         'full_name': raw_repo['full_name'],
         'name': raw_repo['name'],
-        'owner_key_added': False,
+        'owner_key': None,
         'owner_login': raw_repo['owner']['login'],
         'owner_url': raw_repo['owner']['html_url'],
         'private': raw_repo['private'],
@@ -39,12 +39,11 @@ for raw_repo in r.json():
     }
 
     # Check for user SSH keys
-    key_url = '%s.keys' % raw_repo['owner']['html_url']
-    r = requests.get(key_url)
-    if r.text.startswith('ssh-'):
-        repo['owner_key_added'] = True
+    key = requests.get('%s.keys' % raw_repo['owner']['html_url']).text.strip()
+    if key.startswith('ssh-'):
+        repo['owner_key'] = key
 
-    if repo['private'] and repo['owner_key_added']:
+    if repo['private'] and repo['owner_key']:
         repo['ready'] = True
 
     repos.append(repo)
@@ -75,8 +74,8 @@ html = '''
                 <th>GitHub user</th>
                 <th>Repository</th>
                 <th>Private?</th>
-                <th>SSH key added?</th>
-                <th>Latest activity</th>
+                <th>SSH key</th>
+                <th>Last activity</th>
             </tr>
 '''
 
@@ -92,22 +91,22 @@ for repo in repos:
     else:
         html += '<td class="fail">No</td>'
 
-    if repo['owner_key_added']:
-        html += '<td class="ok">Yes</td>'
+    if repo['owner_key']:
+        html += '<td class="ok"><a href="%s.keys"><pre>...%s</pre></a></td>' % (repo['owner_url'], repo['owner_key'].split(' ')[-1][-8:])
     else:
-        html += '<td class="fail">No</td>'
+        html += '<td class="fail">Not added</td>'
 
-    latest_activity_time = time.strptime(repo['pushed_at'], '%Y-%m-%dT%H:%M:%SZ')
-    latest_activity_time_days = (now - int(time.mktime(latest_activity_time))) / 86400
-    latest_activity_time_str = time.strftime('%b %e', latest_activity_time)
+    last_activity_time = time.strptime(repo['pushed_at'], '%Y-%m-%dT%H:%M:%SZ')
+    last_activity_time_days = (now - int(time.mktime(last_activity_time))) / 86400
+    last_activity_time_str = time.strftime('%b %e', last_activity_time)
     if not repo['ready']:
         html += '<td class="fail">---</td>'
-    elif latest_activity_time_days < 8:
-        html += '<td class="ok">%s</td>' % latest_activity_time_str
-    elif latest_activity_time_days < 15:
-        html += '<td>%s</td>' % latest_activity_time_str
+    elif last_activity_time_days < 8:
+        html += '<td class="ok">%s</td>' % last_activity_time_str
+    elif last_activity_time_days < 15:
+        html += '<td>%s</td>' % last_activity_time_str
     else:
-        html += '<td class="fail">%s</td>' % latest_activity_time_str
+        html += '<td class="fail">%s</td>' % last_activity_time_str
 
     html += '</tr>'
 

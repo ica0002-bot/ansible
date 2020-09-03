@@ -2,6 +2,10 @@ h1 {
     padding: 0 0.2em;
 }
 
+pre {
+    margin: 0;
+}
+
 td, th {
     border: 1px solid #bbb;
     padding: 0.5em 1em;
@@ -17,6 +21,14 @@ tr:nth-child(odd) {
     background-color: #eee;
 }
 
+.fail {
+    color: #c00;
+}
+
+.footer {
+    padding: 1em 0.2em;
+}
+
 .index-item {
     border: 1px solid #eee;
     margin: 1em 0;
@@ -24,14 +36,6 @@ tr:nth-child(odd) {
     text-align: center;
     width: 100%;
     box-sizing: border-box;
-}
-
-.fail {
-    color: #c00;
-}
-
-.footer {
-    padding: 1em 0.2em;
 }
 
 .ok {
