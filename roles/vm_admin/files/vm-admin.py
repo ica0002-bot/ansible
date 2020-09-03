@@ -180,7 +180,8 @@ def write_data(vms):
             <link rel="stylesheet" type="text/css" href="style.css">
         </head>
         <body>
-            <h1><a href="/">ICA0002 2020</a> &raquo; VMs</h1>
+            <a href="/">ICA0002 2020</a> &raquo; <a href="/vms.html">Virtual Machines</a>
+            <h1>ICA0002 2020</a> Virtual Machines</h1>
             <table>
                 <tr>
                     <th>GitHub user</th>
@@ -191,6 +192,8 @@ def write_data(vms):
                 </tr>
     '''
 
+    total_vm_count = 0
+    ready_vm_count = 0
     students = extract_students(vms)
     for student in students:
         vm_ips = []
@@ -201,8 +204,15 @@ def write_data(vms):
         for vm in student_vms:
             vm_ips.append(vm['ip'])
             vm_names.append(vm['name'])
-            vm_ssh_ports.append(vm['public_ssh'].replace(':', ' port ').replace('student_key_not_added_yet', 'Still creating...'))
             vm_urls.append('<a href="%s">%s</a>' % (vm['public_url'], vm['public_url']))
+
+            if vm['public_ssh'] == 'student_key_not_added_yet':
+                vm_ssh_ports.append('Still creating...')
+            else:
+                vm_ssh_ports.append(vm['public_ssh'].replace(':', ' port '))
+                ready_vm_count += 1
+
+            total_vm_count += 1
 
         html += '<tr>'
         html += '<td><a href="https://github.com/%s">%s</a></td>' % (student, student)
@@ -213,11 +223,12 @@ def write_data(vms):
         html += '</tr>'
 
     html += '''
+                <tr><th colspan="5">Total: %d &nbsp; &middot; &nbsp; Ready: %d</th></tr>
             </table>
             <div class="footer">Last checked on %s.</div>
         </body>
     </html>
-    ''' % time.strftime('%b %d at %H:%M %Z')
+    ''' % (total_vm_count, ready_vm_count, time.strftime('%b %d at %H:%M %Z'))
 
     with open('/opt/ica0002/pub/vms.html', 'w') as f:
         f.write(html)

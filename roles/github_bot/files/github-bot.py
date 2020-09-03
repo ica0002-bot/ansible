@@ -29,7 +29,7 @@ for raw_repo in r.json():
     repo = {
         'full_name': raw_repo['full_name'],
         'name': raw_repo['name'],
-        'owner_key_added': False,
+        'owner_key': None,
         'owner_login': raw_repo['owner']['login'],
         'owner_url': raw_repo['owner']['html_url'],
         'private': raw_repo['private'],
@@ -39,17 +39,24 @@ for raw_repo in r.json():
     }
 
     # Check for user SSH keys
-    key_url = '%s.keys' % raw_repo['owner']['html_url']
-    r = requests.get(key_url)
-    if r.text.startswith('ssh-'):
-        repo['owner_key_added'] = True
+    key = requests.get('%s.keys' % raw_repo['owner']['html_url']).text.strip()
+    if key.startswith('ssh-'):
+        repo['owner_key'] = key
 
-    if repo['private'] and repo['owner_key_added']:
+    if repo['private'] and repo['owner_key']:
         repo['ready'] = True
 
     repos.append(repo)
 
 repos = sorted(repos, key=lambda k: k['owner_login'])
+
+ready_repo_owners = []
+ready_repos = []
+for repo in repos:
+    if repo['ready']:
+        ready_repo_owners.append(repo['owner_login'])
+        ready_repos.append(repo['full_name'])
+
 
 # Compose HTML
 html = '''
@@ -60,14 +67,15 @@ html = '''
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
-        <h1><a href="/">ICA0002 2020</a> &raquo; Students</h1>
+        <a href="/">ICA0002 2020</a> &raquo; <a href="/students.html">Students</a>
+        <h1>ICA0002 2020 Students</h1>
         <table>
             <tr>
                 <th>GitHub user</th>
                 <th>Repository</th>
                 <th>Private?</th>
-                <th>SSH key added?</th>
-                <th>Status</th>
+                <th>SSH key</th>
+                <th>Last activity</th>
             </tr>
 '''
 
@@ -83,50 +91,38 @@ for repo in repos:
     else:
         html += '<td class="fail">No</td>'
 
-    if repo['owner_key_added']:
-        html += '<td class="ok">Yes</td>'
+    if repo['owner_key']:
+        html += '<td class="ok"><a href="%s.keys"><pre>...%s</pre></a></td>' % (repo['owner_url'], repo['owner_key'].split(' ')[-1][-8:])
     else:
-        html += '<td class="fail">No</td>'
+        html += '<td class="fail">Not added</td>'
 
-    if repo['ready']:
-        html += '<td class="ok">All set up</td>'
+    last_activity_time = time.strptime(repo['pushed_at'], '%Y-%m-%dT%H:%M:%SZ')
+    last_activity_time_days = (now - int(time.mktime(last_activity_time))) / 86400
+    last_activity_time_str = time.strftime('%b %e', last_activity_time)
+    if not repo['ready']:
+        html += '<td class="fail">---</td>'
+    elif last_activity_time_days < 8:
+        html += '<td class="ok">%s</td>' % last_activity_time_str
+    elif last_activity_time_days < 15:
+        html += '<td>%s</td>' % last_activity_time_str
     else:
-        html += '<td class="fail">In progress...</td>'
-
-    # We'll enable that after week 2 or smth.
-    #last_active_time_hours = (now - int(time.mktime(time.strptime(repo['pushed_at'], '%Y-%m-%dT%H:%M:%SZ')))) / 3600
-    #if last_active_time_hours < 1:
-    #    html += '<td class="ok"><abbr title="%s">less than an hour ago</abbr></td>' % repo['pushed_at']
-    #elif last_active_time_hours < 24:
-    #    html += '<td class="ok"><abbr title="%s">less than a day ago</abbr></td>' % repo['pushed_at']
-    #elif last_active_time_hours < 24 * 7:
-    #    html += '<td><abbr title="%s">less than a week ago</abbr></td>' % repo['pushed_at']
-    #elif last_active_time_hours < 24 * 14:
-    #    html += '<td><abbr title="%s">less than two weeks ago</abbr></td>' % repo['pushed_at']
-    #else:
-    #    html += '<td class="fail"><abbr title="%s">more that two weeks ago</abbr></td>' % repo['pushed_at']
+        html += '<td class="fail">%s</td>' % last_activity_time_str
 
     html += '</tr>'
 
 html += '''
+            <tr><th colspan="5">Total: %d &nbsp; &middot; &nbsp; Repositories set up: %d</th>
+            </tr>
         </table>
         <div class="footer">Last checked on %s.</div>
     </body>
 </html>
-''' % time.strftime('%b %d at %H:%M %Z')
+''' % (len(repos), len(ready_repos), time.strftime('%b %d at %H:%M %Z'))
 
 with open('/opt/ica0002/pub/students.html', 'w') as f:
     f.write(html)
 
 # Dump list of GitHub repos and repo owners
-ready_repo_owners = []
-ready_repos = []
-
-for repo in repos:
-    if repo['ready']:
-        ready_repo_owners.append(repo['owner_login'])
-        ready_repos.append(repo['full_name'])
-
 with open('/opt/ica0002/data/students-with-github-set-up.txt', 'w') as f:
     f.write('\n'.join(ready_repo_owners) + '\n')
 
