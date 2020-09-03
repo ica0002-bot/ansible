@@ -114,7 +114,16 @@ html += '''
             <tr><th colspan="5">Total: %d &nbsp; &middot; &nbsp; Repositories set up: %d</th>
             </tr>
         </table>
-        <div class="footer">Last checked on %s.</div>
+        <div class="footer">
+            Updated every 15 minutes. Last checked on %s.
+            <br><br>
+            Cannot find yourself in this list?
+            Make sure your GitHub repository is
+            <a href="https://github.com/romankuchin/ica0002-2020/blob/master/01-intro/lab.md">set up correctly</a>.
+            <br><br>
+            If you believe that something is still wrong please
+            <a href="https://github.com/romankuchin/ica0002-2020#teacher-contacts">contact us</a>.
+        </div>
     </body>
 </html>
 ''' % (len(repos), len(ready_repos), time.strftime('%b %d at %H:%M %Z'))
