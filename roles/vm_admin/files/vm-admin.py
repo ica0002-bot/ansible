@@ -239,7 +239,17 @@ def write_data(vms):
     html += '''
                 <tr><th colspan="5">Total: %d &nbsp; &middot; &nbsp; Ready: %d</th></tr>
             </table>
-            <div class="footer">Last checked on %s.</div>
+            <div class="footer">
+                Updated every 15 minutes. Last checked on %s.
+                <br><br>
+                Missing VMs are ususally added within 6 hours after your GitHub repository is set up.
+                <br><br>
+                Cannot find yourself in this list?
+                Make sure your GitHub repository is <a href="/students.html">set up correctly</a>.
+                <br><br>
+                If you believe that something is still wrong please
+                <a href="https://github.com/romankuchin/ica0002-2020#teacher-contacts">contact us</a>.
+            </div>
         </body>
     </html>
     ''' % (total_vm_count, ready_vm_count, time.strftime('%b %d at %H:%M %Z'))
