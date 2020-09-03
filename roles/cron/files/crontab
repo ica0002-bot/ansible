@@ -5,11 +5,10 @@
 # Tue + Wed -- 16:00..20:59
 #
 
-* 13-17 * * 2,3 root /usr/local/bin/github-bot
-* 13-17 * * 2,3 root sleep 10; /usr/local/bin/student-vms 1
-* 13-17 * * 2,3 root sleep 30; /usr/local/bin/vm-admin dump
-
-*/5 17-20 * * 2,3 root /usr/local/bin/vm-ssh-key all
+*/5 13-17 * * 2,3 root /usr/local/bin/github-bot
+*/5 13-17 * * 2,3 root sleep 60; /usr/local/bin/student-vms 1
+*/5 13-17 * * 2,3 root sleep 120; /usr/local/bin/vm-admin dump
+*/5 13-17 * * 2,3 root sleep 180; /usr/local/bin/vm-ssh-key all
 
 #
 # Jobs outside of class times
