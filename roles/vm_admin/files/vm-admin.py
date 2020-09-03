@@ -18,26 +18,6 @@ project_id = '22d7e03a0d654f98bd45cafd592ce8a2'
 vm1_public_ip = '193.40.156.86'
 
 
-def extract_student_vms(vms, student):
-    student_vms = []
-
-    for vm in vms:
-        if vm['description'] == student:
-            student_vms.append(vm)
-
-    return student_vms
-
-
-def extract_students(vms):
-    students = []
-
-    for vm in vms:
-        if not vm['description'] in students:
-            students.append(vm['description'])
-
-    return sorted(students)
-
-
 def get_vms():
     vms = []
     vms_with_keys = []
@@ -84,20 +64,49 @@ def get_vms():
     return vms
 
 
+def group_vms_by_student(vms):
+    student_vms = {}
+
+    for vm in vms:
+        student = vm['description']
+        if not student in student_vms:
+            student_vms[student] = []
+        student_vms[student].append(vm)
+
+    print('Retrieving student info...')
+    with open('/opt/ica0002/data/students-with-github-set-up.txt') as f:
+        raw_students = f.readlines()
+    for raw_student in raw_students:
+        student = raw_student.strip()
+        if not student in student_vms:
+            student_vms[student] = []
+
+    return student_vms
+
+
 def print_vms(vms, student='all'):
-    students = extract_students(vms) if student == 'all' else [student]
-    for student in students:
-        student_vms = extract_student_vms(vms, student)
-        print('\nStudent %s VMs:' % student)
-        for vm in student_vms:
+    student_vms = group_vms_by_student(vms)
+    for s in sorted(student_vms.keys()):
+        if student not in ['all', s]:
+            continue
+
+        heading = '\nStudent %s VMs:' % s
+        if not student_vms[s]:
+            print('%s none' % heading)
+            continue
+
+        print(heading)
+        for vm in student_vms[s]:
             print('  - %s  %s  %s  %s' % (vm['name'], vm['ip'], vm['public_ssh'], vm['public_url']))
 
 
 def interpret_status_code(code):
-    if code == 200 or code == 201 or code == 202:
+    if code in [200, 201, 202]:
         return '\033[92m[OK]\033[0m'
+
     if code == 400:
         return '\033[91m[FAIL]\033[0m'
+
     return code
 
 
@@ -145,15 +154,18 @@ def adjust_vm_count(vms, student, vm_count):
         print('ERROR: allowed VM counts are 0, 1, 2 and 3.')
         sys.exit(1)
 
-    student_vms = extract_student_vms(vms, student)
-    actual_vm_count = len(student_vms)
+    student_vms = group_vms_by_student(vms)
+
+    actual_vm_count = 0
+    if student in student_vms:
+        actual_vm_count = len(student_vms[student])
     diff = abs(actual_vm_count - vm_count)
 
     print('Student %s has %d VMs, desired: %d' % (student, actual_vm_count, vm_count))
     if actual_vm_count > vm_count:
         for i in range(int(vm_count), actual_vm_count):
-            print('Deleting VM %s...' % student_vms[i]['name'])
-            delete_vm(student_vms[i]['uuid'])
+            print('Deleting VM %s...' % student_vms[student][i]['name'])
+            delete_vm(student_vms[student][i]['uuid'])
     elif actual_vm_count < vm_count:
         for i in range(actual_vm_count, int(vm_count)):
             create_vm(student, i + 1)
@@ -194,32 +206,34 @@ def write_data(vms):
 
     total_vm_count = 0
     ready_vm_count = 0
-    students = extract_students(vms)
+
+    student_vms = group_vms_by_student(vms)
+    students = sorted(student_vms.keys())
     for student in students:
         vm_ips = []
         vm_names = []
-        vm_ssh_ports = []
+        vm_ssh_logins = []
         vm_urls = []
-        student_vms = extract_student_vms(vms, student)
-        for vm in student_vms:
+
+        for vm in student_vms[student]:
             vm_ips.append(vm['ip'])
             vm_names.append(vm['name'])
             vm_urls.append('<a href="%s">%s</a>' % (vm['public_url'], vm['public_url']))
 
             if vm['public_ssh'] == 'student_key_not_added_yet':
-                vm_ssh_ports.append('Still creating...')
+                vm_ssh_logins.append('Still creating...')
             else:
-                vm_ssh_ports.append(vm['public_ssh'].replace(':', ' port '))
+                vm_ssh_logins.append(vm['public_ssh'].replace(':', ' port '))
                 ready_vm_count += 1
 
             total_vm_count += 1
 
         html += '<tr>'
         html += '<td><a href="https://github.com/%s">%s</a></td>' % (student, student)
-        html += '<td>%s</td>' % ('<br>'.join(vm_names))
-        html += '<td>%s</td>' % ('<br>'.join(vm_ips))
-        html += '<td>%s</td>' % ('<br>'.join(vm_ssh_ports))
-        html += '<td>%s</td>' % ('<br>'.join(vm_urls))
+        html += '<td>%s</td>' % ('<br>'.join(vm_names or ['---']))
+        html += '<td>%s</td>' % ('<br>'.join(vm_ips or ['---']))
+        html += '<td>%s</td>' % ('<br>'.join(vm_ssh_logins or ['---']))
+        html += '<td>%s</td>' % ('<br>'.join(vm_urls or ['---']))
         html += '</tr>'
 
     html += '''
