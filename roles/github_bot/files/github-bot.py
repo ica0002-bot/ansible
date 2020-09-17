@@ -102,7 +102,7 @@ for repo in repos:
     else:
         html += '<td class="fail">Not added</td>'
     last_activity_time_str = time.strftime('%b %e', repo['last_activity_time'])
-    if not repo['ready']:
+    if not (repo['private'] and repo['owner_key']):
         html += '<td class="fail">---</td>'
     elif repo['last_activity_time_days'] < 8:
         html += '<td class="ok">%s</td>' % last_activity_time_str

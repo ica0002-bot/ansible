@@ -26,6 +26,12 @@
       - index.html
       - style.css
 
+  - name: Iptables-persistent package
+    apt:
+      name: iptables-persistent
+    tags:
+      - iptables
+
   - name: Iptables HTTP port forward
     iptables:
       table: nat
@@ -37,6 +43,7 @@
     with_sequence: start=10 end=200
     tags:
       - iptables
+    notify: Iptables save
 
   - name: Iptables SSH port forward
     iptables:
@@ -49,6 +56,7 @@
     with_sequence: start=10 end=200
     tags:
       - iptables
+    notify: Iptables save
 
   - name: Iptables masquerading
     iptables:
@@ -58,3 +66,4 @@
       jump: MASQUERADE
     tags:
       - iptables
+    notify: Iptables save
