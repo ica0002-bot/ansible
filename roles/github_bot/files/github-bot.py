@@ -40,7 +40,7 @@ for raw_repo in r.json():
         'owner_url': raw_repo['owner']['html_url'],
         'private': raw_repo['private'],
         'pushed_at': raw_repo['pushed_at'],
-        'ready': False,
+        'active': False,
         'url': raw_repo['html_url'],
     }
 
@@ -53,18 +53,18 @@ for raw_repo in r.json():
     repo['last_activity_time_days'] = (now - int(time.mktime(repo['last_activity_time']))) / 86400
 
     if repo['private'] and repo['owner_key'] and repo['last_activity_time_days'] < 15:
-        repo['ready'] = True
+        repo['active'] = True
 
     repos.append(repo)
 
 repos = sorted(repos, key=lambda k: k['owner_login'])
 
-ready_repo_owners = []
-ready_repos = []
+active_repo_owners = []
+active_repos = []
 for repo in repos:
-    if repo['ready']:
-        ready_repo_owners.append(repo['owner_login'])
-        ready_repos.append(repo['full_name'])
+    if repo['active']:
+        active_repo_owners.append(repo['owner_login'])
+        active_repos.append(repo['full_name'])
 
 # Compose HTML
 html = '''
@@ -129,14 +129,14 @@ html += '''
         </div>
     </body>
 </html>
-''' % (len(repos), len(ready_repos), time.strftime('%b %d at %H:%M %Z'))
+''' % (len(repos), len(active_repos), time.strftime('%b %d at %H:%M %Z'))
 
 with open('/opt/ica0002/pub/students.html', 'w') as f:
     f.write(html)
 
 # Dump list of GitHub repos and repo owners
 with open('/opt/ica0002/data/students-with-github-set-up.txt', 'w') as f:
-    f.write('\n'.join(ready_repo_owners) + '\n')
+    f.write('\n'.join(active_repo_owners) + '\n')
 
 with open('/opt/ica0002/data/github-repos.txt', 'w') as f:
-    f.write('\n'.join(ready_repos) + '\n')
+    f.write('\n'.join(active_repos) + '\n')
