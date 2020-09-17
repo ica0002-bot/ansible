@@ -20,7 +20,7 @@ for invitation in r.json():
 # Check for repositories
 repos = []
 
-url = 'https://api.github.com/user/repos?per_page=100' % token
+url = 'https://api.github.com/user/repos?per_page=100'
 r = requests.get(url, headers=header)
 
 now = int(time.time())
