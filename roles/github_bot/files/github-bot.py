@@ -8,19 +8,23 @@ import time
 with open('/root/.github-api-token') as f:
     token = f.readlines()[0].strip()
 
+header = { 'Authorization': 'token %s' % token }
 # Check for invitations
-url = 'https://api.github.com/user/repository_invitations?access_token=%s' % token
-r = requests.get(url)
+url = 'https://api.github.com/user/repository_invitations'
+r = requests.get(url, headers=header)
 for invitation in r.json():
-    url = 'https://api.github.com/user/repository_invitations/%d?access_token=%s' % (invitation['id'], token)
-    r = requests.patch(url)
+    url = 'https://api.github.com/user/repository_invitations/%d' % invitation['id']
+    r = requests.patch(url, headers=header)
     print('Accepted invitation to %s' % invitation['repository']['full_name'])
 
 # Check for repositories
 repos = []
 
-url = 'https://api.github.com/user/repos?access_token=%s&per_page=100' % token
-r = requests.get(url)
+url = 'https://api.github.com/user/repos?per_page=100'
+r = requests.get(url, headers=header)
+
+now = int(time.time())
+
 for raw_repo in r.json():
     # Skip own repos
     if raw_repo['owner']['login'] in ['ica0002-bot']:
@@ -28,6 +32,8 @@ for raw_repo in r.json():
 
     repo = {
         'full_name': raw_repo['full_name'],
+        'last_activity_time': None,
+        'last_activity_time_days': None,
         'name': raw_repo['name'],
         'owner_key': None,
         'owner_login': raw_repo['owner']['login'],
@@ -43,7 +49,10 @@ for raw_repo in r.json():
     if key.startswith('ssh-'):
         repo['owner_key'] = key
 
-    if repo['private'] and repo['owner_key']:
+    repo['last_activity_time'] = time.strptime(repo['pushed_at'], '%Y-%m-%dT%H:%M:%SZ')
+    repo['last_activity_time_days'] = (now - int(time.mktime(repo['last_activity_time']))) / 86400
+
+    if repo['private'] and repo['owner_key'] and repo['last_activity_time_days'] < 15:
         repo['ready'] = True
 
     repos.append(repo)
@@ -56,7 +65,6 @@ for repo in repos:
     if repo['ready']:
         ready_repo_owners.append(repo['owner_login'])
         ready_repos.append(repo['full_name'])
-
 
 # Compose HTML
 html = '''
@@ -79,8 +87,6 @@ html = '''
             </tr>
 '''
 
-now = int(time.time())
-
 for repo in repos:
     html += '<tr>'
     html += '<td><a href="%s">%s</a></td>' % (repo['owner_url'], repo['owner_login'])
@@ -95,15 +101,12 @@ for repo in repos:
         html += '<td class="ok"><a href="%s.keys"><pre>...%s</pre></a></td>' % (repo['owner_url'], repo['owner_key'].split(' ')[-1][-8:])
     else:
         html += '<td class="fail">Not added</td>'
-
-    last_activity_time = time.strptime(repo['pushed_at'], '%Y-%m-%dT%H:%M:%SZ')
-    last_activity_time_days = (now - int(time.mktime(last_activity_time))) / 86400
-    last_activity_time_str = time.strftime('%b %e', last_activity_time)
+    last_activity_time_str = time.strftime('%b %e', repo['last_activity_time'])
     if not repo['ready']:
         html += '<td class="fail">---</td>'
-    elif last_activity_time_days < 8:
+    elif repo['last_activity_time_days'] < 8:
         html += '<td class="ok">%s</td>' % last_activity_time_str
-    elif last_activity_time_days < 15:
+    elif repo['last_activity_time_days'] < 15:
         html += '<td>%s</td>' % last_activity_time_str
     else:
         html += '<td class="fail">%s</td>' % last_activity_time_str
