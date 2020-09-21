@@ -183,9 +183,8 @@ def print_help():
     print('''Usage: %s <options>
 
       Options:
-        all                     - print all known student VMs
         dump                    - generate HTML page
-        <student_name>          - print list of VMs for given student
+        <student_name|all>      - print list of VMs for given student or everybody
         <student_name|all> <n>  - create/delete VMs for given student or everybody''' % sys.argv[0])
 
 
