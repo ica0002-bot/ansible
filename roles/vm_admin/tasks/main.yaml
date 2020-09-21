@@ -17,8 +17,7 @@
       dest: /usr/local/bin/vm-ssh-key
       mode: 0755
 
-  - name: Install student VM SSH manager
-    copy:
-      src: student-vms.sh
-      dest: /usr/local/bin/student-vms
-      mode: 0755
+  - name: Remove student VM manager -- use vm-admin instead
+    file:
+      path: /usr/local/bin/student-vms
+      state: absent
