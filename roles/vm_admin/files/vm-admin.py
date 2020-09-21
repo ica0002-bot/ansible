@@ -29,7 +29,7 @@ def get_vms():
         vms_with_keys.append(vm.strip().split(':')[0])
 
     print('Retrieving list of VMs from Waldur...')
-    r = requests.get('%s/openstacktenant-instances/?page_size=127&project=%s' % (base_url, project_id), headers=headers)
+    r = requests.get('%s/openstacktenant-instances/?page_size=200&project=%s' % (base_url, project_id), headers=headers)
     raw_vm_list = r.json()
     if not isinstance(raw_vm_list, list):
         print('ERROR: Could not get VM list from Waldur. Got this instead:')
