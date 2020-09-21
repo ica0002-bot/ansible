@@ -155,20 +155,26 @@ def adjust_vm_count(vms, student, vm_count):
         sys.exit(1)
 
     student_vms = group_vms_by_student(vms)
+    student_list = []
+    if student == 'all':
+        student_list += sorted(student_vms.keys())
+    else:
+        student_list.append(student)
 
-    actual_vm_count = 0
-    if student in student_vms:
-        actual_vm_count = len(student_vms[student])
-    diff = abs(actual_vm_count - vm_count)
+    for s in student_list:
+        actual_vm_count = 0
+        if s in student_vms:
+            actual_vm_count = len(student_vms[s])
+        diff = abs(actual_vm_count - vm_count)
 
-    print('Student %s has %d VMs, desired: %d' % (student, actual_vm_count, vm_count))
-    if actual_vm_count > vm_count:
-        for i in range(int(vm_count), actual_vm_count):
-            print('Deleting VM %s...' % student_vms[student][i]['name'])
-            delete_vm(student_vms[student][i]['uuid'])
-    elif actual_vm_count < vm_count:
-        for i in range(actual_vm_count, int(vm_count)):
-            create_vm(student, i + 1)
+        print('Student %s has %d VMs, desired: %d' % (s, actual_vm_count, vm_count))
+        if actual_vm_count > vm_count:
+            for i in range(int(vm_count), actual_vm_count):
+                print('Deleting VM %s...' % student_vms[s][i]['name'])
+                delete_vm(student_vms[s][i]['uuid'])
+        elif actual_vm_count < vm_count:
+            for i in range(actual_vm_count, int(vm_count)):
+                create_vm(s, i + 1)
 
     print('All good.')
 
