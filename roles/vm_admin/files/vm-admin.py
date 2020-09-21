@@ -175,6 +175,7 @@ def adjust_vm_count(vms, student, vm_count):
         elif actual_vm_count < vm_count:
             for i in range(actual_vm_count, int(vm_count)):
                 create_vm(s, i + 1)
+        time.sleep(2)
 
     print('All good.')
 
