@@ -29,7 +29,7 @@ def get_vms():
         vms_with_keys.append(vm.strip().split(':')[0])
 
     print('Retrieving list of VMs from Waldur...')
-    r = requests.get('%s/openstacktenant-instances/?page_size=127&project=%s' % (base_url, project_id), headers=headers)
+    r = requests.get('%s/openstacktenant-instances/?page_size=200&project=%s' % (base_url, project_id), headers=headers)
     raw_vm_list = r.json()
     if not isinstance(raw_vm_list, list):
         print('ERROR: Could not get VM list from Waldur. Got this instead:')
@@ -155,20 +155,28 @@ def adjust_vm_count(vms, student, vm_count):
         sys.exit(1)
 
     student_vms = group_vms_by_student(vms)
+    student_list = []
+    if student == 'all':
+        student_list += sorted(student_vms.keys())
+    else:
+        student_list.append(student)
 
-    actual_vm_count = 0
-    if student in student_vms:
-        actual_vm_count = len(student_vms[student])
-    diff = abs(actual_vm_count - vm_count)
+    for s in student_list:
+        actual_vm_count = 0
+        if s in student_vms:
+            actual_vm_count = len(student_vms[s])
+        diff = abs(actual_vm_count - vm_count)
 
-    print('Student %s has %d VMs, desired: %d' % (student, actual_vm_count, vm_count))
-    if actual_vm_count > vm_count:
-        for i in range(int(vm_count), actual_vm_count):
-            print('Deleting VM %s...' % student_vms[student][i]['name'])
-            delete_vm(student_vms[student][i]['uuid'])
-    elif actual_vm_count < vm_count:
-        for i in range(actual_vm_count, int(vm_count)):
-            create_vm(student, i + 1)
+        print('Student %s has %d VMs, desired: %d' % (s, actual_vm_count, vm_count))
+        if actual_vm_count > vm_count:
+            for i in range(int(vm_count), actual_vm_count):
+                print('Deleting VM %s...' % student_vms[s][i]['name'])
+                delete_vm(student_vms[s][i]['uuid'])
+        elif actual_vm_count < vm_count:
+            for i in range(actual_vm_count, int(vm_count)):
+                create_vm(s, i + 1)
+        print('---')
+        time.sleep(2)
 
     print('All good.')
 
@@ -177,10 +185,9 @@ def print_help():
     print('''Usage: %s <options>
 
       Options:
-        all                 - print all known student VMs
-        dump                - generate HTML page
-        <student_name>      - print list of VMs for given student
-        <student_name> <n>  - create/delete VMs for given student''' % sys.argv[0])
+        dump                    - generate HTML page
+        <student_name|all>      - print list of VMs for given student or everybody
+        <student_name|all> <n>  - create/delete VMs for given student or everybody''' % sys.argv[0])
 
 
 def write_data(vms):
