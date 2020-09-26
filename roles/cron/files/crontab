@@ -22,3 +22,4 @@
 11 */6 * * * root /usr/local/bin/github-sucker update keys
 21 */6 * * * root /usr/local/bin/vm-ssh-key all
 26 */6 * * * root /usr/local/bin/github-sucker update repos
+31 */6 * * * root /usr/local/bin/lab-checker >/dev/null

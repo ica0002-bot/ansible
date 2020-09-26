@@ -2,11 +2,40 @@
   - name: Init
     hosts: vm1
     become: yes
+    gather_facts: no
     roles:
-      - users
-      - base
-      - github_bot
-      - github_sucker
-      - vm_admin
-      - cron
-      - nginx
+      - role: users
+        tags:
+          - users
+
+      - role: base
+        tags:
+          - base
+
+      - role: iptables
+        tags:
+          - iptables
+
+      - role: github_bot
+        tags:
+          - github_bot
+
+      - role: github_sucker
+        tags:
+          - github_sucker
+
+      - role: lab_checker
+        tags:
+          - lab_checker
+
+      - role: vm_admin
+        tags:
+          - vm_admin
+
+      - role: cron
+        tags:
+          - cron
+
+      - role: nginx
+        tags:
+          - nginx
