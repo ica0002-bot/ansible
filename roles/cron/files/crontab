@@ -10,7 +10,7 @@
 # Needed only on the first two, maybe three weeks
 #
 
-#*/5 13-17 * * 2,3 root sleep 60; /usr/local/bin/student-vms 1
+#*/5 13-17 * * 2,3 root sleep 60; /usr/local/bin/vm-admin all 1
 #*/5 13-17 * * 2,3 root sleep 180; /usr/local/bin/vm-ssh-key all
 
 #
@@ -18,7 +18,7 @@
 #
 
 # Adjust VMs, sync keys and repos: every 6 hours
-06 */6 * * * root /usr/local/bin/student-vms 2
+06 */6 * * * root /usr/local/bin/vm-admin all 2
 11 */6 * * * root /usr/local/bin/github-sucker update keys
 21 */6 * * * root /usr/local/bin/vm-ssh-key all
 26 */6 * * * root /usr/local/bin/github-sucker update repos
