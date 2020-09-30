@@ -1,0 +1,6 @@
+---
+  - name: Install Dredd The Lab Checker script 
+    copy:
+      src: dredd.sh
+      dest: /usr/local/bin/dredd
+      mode: 0755

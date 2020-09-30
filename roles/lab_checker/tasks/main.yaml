@@ -1,6 +1,0 @@
----
-  - name: Install Lab Checker
-    copy:
-      src: lab-checker.sh
-      dest: /usr/local/bin/lab-checker
-      mode: 0755

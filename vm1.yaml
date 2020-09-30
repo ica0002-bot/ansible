@@ -24,9 +24,9 @@
         tags:
           - github_sucker
 
-      - role: lab_checker
+      - role: dredd
         tags:
-          - lab_checker
+          - dredd
 
       - role: vm_admin
         tags:
