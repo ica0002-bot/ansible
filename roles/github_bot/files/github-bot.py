@@ -19,6 +19,8 @@ for invitation in r.json():
 
 # Check for repositories
 repos = []
+ready_repo_count = 0
+active_repo_count = 0
 
 url = 'https://api.github.com/user/repos?per_page=100'
 r = requests.get(url, headers=header)
@@ -31,6 +33,7 @@ for raw_repo in r.json():
         continue
 
     repo = {
+        'active': False,
         'full_name': raw_repo['full_name'],
         'last_activity_time': None,
         'last_activity_time_days': None,
@@ -40,7 +43,7 @@ for raw_repo in r.json():
         'owner_url': raw_repo['owner']['html_url'],
         'private': raw_repo['private'],
         'pushed_at': raw_repo['pushed_at'],
-        'active': False,
+        'ready': False,
         'url': raw_repo['html_url'],
     }
 
@@ -52,19 +55,17 @@ for raw_repo in r.json():
     repo['last_activity_time'] = time.strptime(repo['pushed_at'], '%Y-%m-%dT%H:%M:%SZ')
     repo['last_activity_time_days'] = (now - int(time.mktime(repo['last_activity_time']))) / 86400
 
-    if repo['private'] and repo['owner_key'] and repo['last_activity_time_days'] < 15:
+    if repo['private'] and repo['owner_key']:
+        repo['ready'] = True
+        ready_repo_count += 1
+
+    if repo['ready'] and repo['last_activity_time_days'] < 15:
         repo['active'] = True
+        active_repo_count += 1
 
     repos.append(repo)
 
 repos = sorted(repos, key=lambda k: k['owner_login'])
-
-active_repo_owners = []
-active_repos = []
-for repo in repos:
-    if repo['active']:
-        active_repo_owners.append(repo['owner_login'])
-        active_repos.append(repo['full_name'])
 
 # Compose HTML
 html = '''
@@ -114,7 +115,7 @@ for repo in repos:
     html += '</tr>'
 
 html += '''
-            <tr><th colspan="5">Total: %d &nbsp; &middot; &nbsp; Repositories set up: %d</th>
+            <tr><th colspan="5">Total: %d &nbsp; &middot; &nbsp; Ready: %d &nbsp; &middot; &nbsp; Active: %d</th>
             </tr>
         </table>
         <div class="footer">
@@ -129,14 +130,23 @@ html += '''
         </div>
     </body>
 </html>
-''' % (len(repos), len(active_repos), time.strftime('%b %d at %H:%M %Z'))
+''' % (len(repos), ready_repo_count, active_repo_count, time.strftime('%b %d at %H:%M %Z'))
 
 with open('/opt/ica0002/pub/students.html', 'w') as f:
     f.write(html)
 
 # Dump list of GitHub repos and repo owners
-with open('/opt/ica0002/data/students-with-github-set-up.txt', 'w') as f:
-    f.write('\n'.join(active_repo_owners) + '\n')
+with open('/opt/ica0002/data/known-students.txt', 'w') as f:
+    f.write('\n'.join([r['owner_login'] for r in repos]) + '\n')
 
-with open('/opt/ica0002/data/github-repos.txt', 'w') as f:
-    f.write('\n'.join(active_repos) + '\n')
+with open('/opt/ica0002/data/active-students.txt', 'w') as f:
+    f.write('\n'.join([r['owner_login'] for r in repos if r['active']]) + '\n')
+
+with open('/opt/ica0002/data/known-repos.txt', 'w') as f:
+    f.write('\n'.join([r['full_name'] for r in repos]) + '\n')
+
+with open('/opt/ica0002/data/ready-repos.txt', 'w') as f:
+    f.write('\n'.join([r['full_name'] for r in repos if r['ready']]) + '\n')
+
+with open('/opt/ica0002/data/active-repos.txt', 'w') as f:
+    f.write('\n'.join([r['full_name'] for r in repos if r['active']]) + '\n')

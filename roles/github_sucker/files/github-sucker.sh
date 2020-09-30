@@ -44,7 +44,7 @@ get_repos() {
             if git branch | grep -q .; then
                 git checkout -- .
                 git checkout master
-                git pull origin master
+                git pull origin master || true
             fi
             cd - > /dev/null
             echo "---"

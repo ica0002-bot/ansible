@@ -1,3 +1,8 @@
-vm1 ansible_host=193.40.156.86 ansible_python_interpreter=python3 ansible_user=ubuntu
+vm1
 
-romankuchin-1 ansible_host=193.40.156.86 ansible_python_interpreter=python3 ansible_user=ubuntu ansible_port=2022
+romankuchin-1  ansible_port=2022
+
+[all:vars]
+ansible_host=193.40.156.86
+ansible_python_interpreter=python3
+ansible_user=ubuntu
