@@ -290,7 +290,7 @@ def write_data():
             <div class="footer">
                 Updated every 15 minutes. Last checked on %s.
                 <br><br>
-                Missing VMs are ususally added within 6 hours after your GitHub repository is set up.
+                Missing VMs are ususally added within 1..2 hours after your GitHub repository is set up.
                 <br><br>
                 Cannot find yourself in this list?
                 Make sure your GitHub repository is <a href="/students.html">set up correctly</a>.

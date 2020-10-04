@@ -16,9 +16,9 @@
 # Jobs outside of class times
 #
 
-# Adjust VMs, sync keys and repos: every 6 hours
-06 */6 * * * root /usr/local/bin/vm-admin active 2
-11 */6 * * * root /usr/local/bin/github-sucker update keys
-21 */6 * * * root /usr/local/bin/vm-ssh-key all
-26 */6 * * * root /usr/local/bin/github-sucker update repos
-31 */6 * * * root /usr/local/bin/dredd >/dev/null
+# Adjust VMs, sync keys and repos: every hour
+06 * * * * root /usr/local/bin/vm-admin active 2
+11 * * * * root /usr/local/bin/github-sucker update keys
+21 * * * * root /usr/local/bin/vm-ssh-key all
+26 * * * * root /usr/local/bin/github-sucker update repos
+31 * * * * root /usr/local/bin/dredd >/dev/null
