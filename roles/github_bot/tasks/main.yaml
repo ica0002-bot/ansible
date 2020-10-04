@@ -1,5 +1,5 @@
 ---
-  - name: Install GitHub Bot
+  - name: Install GitHub bot
     copy:
       src: github-bot.py
       dest: /usr/local/bin/github-bot
