@@ -85,10 +85,13 @@ html = '''
                 <th>Private?</th>
                 <th>SSH key</th>
                 <th>Last activity</th>
+                <th>Comment</th>
             </tr>
 '''
 
 for repo in repos:
+    comment = '&nbsp;'
+
     html += '<tr>'
     html += '<td><a href="%s">%s</a></td>' % (repo['owner_url'], repo['owner_login'])
     html += '<td><a href="%s">%s</a></td>' % (repo['url'], repo['name'])
@@ -103,19 +106,23 @@ for repo in repos:
     else:
         html += '<td class="fail">Not added</td>'
     last_activity_time_str = time.strftime('%b %e', repo['last_activity_time'])
-    if not (repo['private'] and repo['owner_key']):
+    if not repo['ready']:
         html += '<td class="fail">---</td>'
+        comment = 'Please complete the repository setup so we could start some VMs for you.'
     elif repo['last_activity_time_days'] < 8:
         html += '<td class="ok">%s</td>' % last_activity_time_str
     elif repo['last_activity_time_days'] < 15:
         html += '<td>%s</td>' % last_activity_time_str
+        comment = 'Recently there were no activity in the repository. VMs may be deleted soon. Please add a few commits to keep the VMs running.'
     else:
         html += '<td class="fail">%s</td>' % last_activity_time_str
+        comment = 'VMs were deleted due to no recent activity in the repository. Please add a few commits, and VMs will be restored soon after.'
 
+    html += '<td class="comment">%s</td>' % comment
     html += '</tr>'
 
 html += '''
-            <tr><th colspan="5">Total: %d &nbsp; &middot; &nbsp; Ready: %d &nbsp; &middot; &nbsp; Active: %d</th>
+            <tr><th colspan="6">Total: %d &nbsp; &middot; &nbsp; Ready: %d &nbsp; &middot; &nbsp; Active: %d</th>
             </tr>
         </table>
         <div class="footer">

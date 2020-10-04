@@ -1,5 +1,3 @@
-# !!! Make sure to update times on DST change !!!
-
 # Update student and VM info -- every 15 minutes
 */15 * * * * root /usr/local/bin/github-bot
 */15 * * * * root /usr/local/bin/vm-admin dump
@@ -8,18 +6,19 @@
 # Jobs during class times
 # Tue + Wed -- 16:00..20:59
 # Needed only on the first two, maybe three weeks
+# This schedule covers both EEST (dayloght saving time) and EET
 #
 
-#*/5 13-17 * * 2,3 root sleep 60; /usr/local/bin/vm-admin all 1
-#*/5 13-17 * * 2,3 root sleep 180; /usr/local/bin/vm-ssh-key all
+#*/5 13-18 * * 2,3 root sleep 60; /usr/local/bin/vm-admin all 1
+#*/5 13-18 * * 2,3 root sleep 180; /usr/local/bin/vm-ssh-key all
 
 #
 # Jobs outside of class times
 #
 
-# Adjust VMs, sync keys and repos: every 6 hours
-06 */6 * * * root /usr/local/bin/vm-admin all 2
-11 */6 * * * root /usr/local/bin/github-sucker update keys
-21 */6 * * * root /usr/local/bin/vm-ssh-key all
-26 */6 * * * root /usr/local/bin/github-sucker update repos
-31 */6 * * * root /usr/local/bin/dredd >/dev/null
+# Adjust VMs, sync keys and repos: every hour
+06 * * * * root /usr/local/bin/vm-admin active 2
+11 * * * * root /usr/local/bin/github-sucker update keys
+21 * * * * root /usr/local/bin/vm-ssh-key all
+26 * * * * root /usr/local/bin/github-sucker update repos
+31 * * * * root /usr/local/bin/dredd >/dev/null

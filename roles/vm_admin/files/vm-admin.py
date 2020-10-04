@@ -18,15 +18,84 @@ project_id = '22d7e03a0d654f98bd45cafd592ce8a2'
 vm1_public_ip = '193.40.156.86'
 
 
-def get_vms():
+def format_student(student, active):
+    return 'Student %s%s' % (student, '' if active else ' (INACTIVE)')
+
+
+def get_active_students():
+    students = []
+
+    print('Retrieving student info...')
+    with open('/opt/ica0002/data/active-students.txt') as f:
+        raw_students = f.readlines()
+    for raw_student in raw_students:
+        students.append(raw_student.strip())
+
+    return students
+
+
+def get_ready_vm_ips():
     vms = []
-    vms_with_keys = []
 
     print('Retrieving SSH key info...')
-    with open('/opt/ica0002/data/vms-with-student-key-added.txt') as f:
-        raw_vm_list = f.readlines()
-    for vm in raw_vm_list:
-        vms_with_keys.append(vm.strip().split(':')[0])
+    try:
+        with open('/opt/ica0002/data/ready-vms.txt') as f:
+            raw_vm_list = f.readlines()
+        for vm in raw_vm_list:
+            vms.append(vm.strip().split(':')[0])
+    except FileNotFoundError:
+        pass
+
+    return vms
+
+
+def get_student_vms(student_query):
+    student_vms = {}
+
+    active_students = get_active_students()
+    ready_vm_ips = get_ready_vm_ips()
+    waldur_vms = get_waldur_vms()
+    q = set(student_query.split(','))
+
+    # Add active students matching the query that may have some (or no) VMs
+    for student in active_students:
+        if not q & {'all', 'active', student}:
+            continue
+
+        student_vms[student] = {
+            'active': True,
+            'vms': [],
+        }
+
+    # Group existing VMs by student
+    for vm in waldur_vms:
+        student = vm['description']
+
+        if q & {'active'}:
+            if student not in active_students:
+                continue
+        elif q & {'inactive'}:
+            if student in active_students:
+                continue
+        elif not q & {'all', student}:
+            continue
+
+        if student not in student_vms:
+            student_vms[student] = {
+                'active': False,
+                'vms': [],
+            }
+
+        if vm['ip'] not in ready_vm_ips:
+            vm['public_ssh'] = 'student_key_not_added_yet'
+
+        student_vms[student]['vms'].append(vm)
+
+    return student_vms
+
+
+def get_waldur_vms():
+    vms = []
 
     print('Retrieving list of VMs from Waldur...')
     r = requests.get('%s/openstacktenant-instances/?page_size=200&project=%s' % (base_url, project_id), headers=headers)
@@ -47,16 +116,12 @@ def get_vms():
 
         ip = vm['internal_ips'][0]
         vm_id = ip.split('.')[-1]
-        if ip in vms_with_keys:
-            public_ssh = 'ubuntu@%s:%s22' % (vm1_public_ip, vm_id)
-        else:
-            public_ssh = 'student_key_not_added_yet'
 
         vms.append({
             'description': vm['description'],
             'ip': ip,
             'name': vm['name'],
-            'public_ssh': public_ssh,
+            'public_ssh': 'ubuntu@%s:%s22' % (vm1_public_ip, vm_id),
             'public_url': 'http://%s:%s80' % (vm1_public_ip, vm_id),
             'uuid': vm['uuid'],
         })
@@ -64,39 +129,16 @@ def get_vms():
     return vms
 
 
-def group_vms_by_student(vms):
-    student_vms = {}
-
-    for vm in vms:
-        student = vm['description']
-        if not student in student_vms:
-            student_vms[student] = []
-        student_vms[student].append(vm)
-
-    print('Retrieving student info...')
-    with open('/opt/ica0002/data/students-with-github-set-up.txt') as f:
-        raw_students = f.readlines()
-    for raw_student in raw_students:
-        student = raw_student.strip()
-        if not student in student_vms:
-            student_vms[student] = []
-
-    return student_vms
-
-
-def print_vms(vms, student='all'):
-    student_vms = group_vms_by_student(vms)
-    for s in sorted(student_vms.keys()):
-        if student not in ['all', s]:
-            continue
-
-        heading = '\nStudent %s VMs:' % s
-        if not student_vms[s]:
+def print_vms(student_query):
+    student_vms = get_student_vms(student_query)
+    for student in sorted(student_vms.keys()):
+        heading = '\n%s VMs:' % format_student(student, student_vms[student]['active'])
+        if not student_vms[student]:
             print('%s none' % heading)
             continue
 
         print(heading)
-        for vm in student_vms[s]:
+        for vm in student_vms[student]['vms']:
             print('  - %s  %s  %s  %s' % (vm['name'], vm['ip'], vm['public_ssh'], vm['public_url']))
 
 
@@ -149,32 +191,24 @@ def delete_vm(vm_id):
     print('Request to delete VM. Response: %s' % interpret_status_code(r.status_code))
 
 
-def adjust_vm_count(vms, student, vm_count):
+def adjust_vm_count(student_query, vm_count):
     if not 0 <= vm_count <= 3:
         print('ERROR: allowed VM counts are 0, 1, 2 and 3.')
         sys.exit(1)
 
-    student_vms = group_vms_by_student(vms)
-    student_list = []
-    if student == 'all':
-        student_list += sorted(student_vms.keys())
-    else:
-        student_list.append(student)
-
-    for s in student_list:
-        actual_vm_count = 0
-        if s in student_vms:
-            actual_vm_count = len(student_vms[s])
+    student_vms = get_student_vms(student_query)
+    for student in sorted(student_vms.keys()):
+        actual_vm_count = len(student_vms[student]['vms'])
         diff = abs(actual_vm_count - vm_count)
 
-        print('Student %s has %d VMs, desired: %d' % (s, actual_vm_count, vm_count))
+        print('%s has %d VMs, desired: %d' % (format_student(student, student_vms[student]['active']), actual_vm_count, vm_count))
         if actual_vm_count > vm_count:
             for i in range(int(vm_count), actual_vm_count):
-                print('Deleting VM %s...' % student_vms[s][i]['name'])
-                delete_vm(student_vms[s][i]['uuid'])
+                print('Deleting VM %s...' % student_vms[student]['vms'][i]['name'])
+                delete_vm(student_vms[student]['vms'][i]['uuid'])
         elif actual_vm_count < vm_count:
             for i in range(actual_vm_count, int(vm_count)):
-                create_vm(s, i + 1)
+                create_vm(student, i + 1)
         print('---')
         time.sleep(2)
 
@@ -185,12 +219,20 @@ def print_help():
     print('''Usage: %s <options>
 
       Options:
-        dump                    - generate HTML page
-        <student_name|all>      - print list of VMs for given student or everybody
-        <student_name|all> <n>  - create/delete VMs for given student or everybody''' % sys.argv[0])
+        dump         - generate HTML page
+        <query>      - print list of VMs for students matching the query
+        <query> <n>  - adjust number of VMs: create/delete VMs to match <n>
+
+      Query:
+        active                 - match active students
+        all                    - match all students
+        inactive               - match inactive students
+        <student_name>[,<...>] - match these student names (each name exactly, no regexps)
+
+      List of active students can be found in /opt/ica0002/data/active-students.txt.''' % sys.argv[0])
 
 
-def write_data(vms):
+def write_data():
     html = '''
     <html>
         <head>
@@ -214,15 +256,14 @@ def write_data(vms):
     total_vm_count = 0
     ready_vm_count = 0
 
-    student_vms = group_vms_by_student(vms)
-    students = sorted(student_vms.keys())
-    for student in students:
+    student_vms = get_student_vms('all')
+    for student in sorted(student_vms.keys()):
         vm_ips = []
         vm_names = []
         vm_ssh_logins = []
         vm_urls = []
 
-        for vm in student_vms[student]:
+        for vm in student_vms[student]['vms']:
             vm_ips.append(vm['ip'])
             vm_names.append(vm['name'])
             vm_urls.append('<a href="%s">%s</a>' % (vm['public_url'], vm['public_url']))
@@ -249,7 +290,7 @@ def write_data(vms):
             <div class="footer">
                 Updated every 15 minutes. Last checked on %s.
                 <br><br>
-                Missing VMs are ususally added within 6 hours after your GitHub repository is set up.
+                Missing VMs are ususally added within 1..2 hours after your GitHub repository is set up.
                 <br><br>
                 Cannot find yourself in this list?
                 Make sure your GitHub repository is <a href="/students.html">set up correctly</a>.
@@ -264,21 +305,13 @@ def write_data(vms):
     with open('/opt/ica0002/pub/vms.html', 'w') as f:
         f.write(html)
 
-    with open('/opt/ica0002/data/students-with-vms.txt', 'w') as f:
-        f.write('\n'.join(students) + '\n')
 
-
-if len(sys.argv) <= 1:
+if len(sys.argv) < 2:
     print_help()
     sys.exit(1)
-
-vms = get_vms()
-
-if sys.argv[1] == 'dump':
-    write_data(vms)
-elif len(sys.argv) == 2:
-    print_vms(vms, student=sys.argv[1])
+elif sys.argv[1] == 'dump':
+    write_data()
+elif len(sys.argv) < 3:
+    print_vms(sys.argv[1])
 else:
-    for s in sys.argv[1].split(','):
-        if s:
-            adjust_vm_count(vms, s, int(sys.argv[2]))
+    adjust_vm_count(sys.argv[1], int(sys.argv[2]))
