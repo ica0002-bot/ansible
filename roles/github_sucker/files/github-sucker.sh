@@ -68,7 +68,7 @@ u*) update_existing=true ;;
     ;;
 esac
 
-repos=$(cat "/opt/ica0002/data/github-repos.txt")
+repos=$(cat "/opt/ica0002/data/ready-repos.txt")
 
 case "${2:-}" in
 k*) get_keys $repos ;;

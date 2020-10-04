@@ -23,10 +23,13 @@ def get_vms():
     vms_with_keys = []
 
     print('Retrieving SSH key info...')
-    with open('/opt/ica0002/data/vms-with-student-key-added.txt') as f:
-        raw_vm_list = f.readlines()
-    for vm in raw_vm_list:
-        vms_with_keys.append(vm.strip().split(':')[0])
+    try:
+        with open('/opt/ica0002/data/ready-vms.txt') as f:
+            raw_vm_list = f.readlines()
+        for vm in raw_vm_list:
+            vms_with_keys.append(vm.strip().split(':')[0])
+    except FileNotFoundError:
+        pass
 
     print('Retrieving list of VMs from Waldur...')
     r = requests.get('%s/openstacktenant-instances/?page_size=200&project=%s' % (base_url, project_id), headers=headers)
@@ -67,19 +70,25 @@ def get_vms():
 def group_vms_by_student(vms):
     student_vms = {}
 
-    for vm in vms:
-        student = vm['description']
-        if not student in student_vms:
-            student_vms[student] = []
-        student_vms[student].append(vm)
-
     print('Retrieving student info...')
-    with open('/opt/ica0002/data/students-with-github-set-up.txt') as f:
+    with open('/opt/ica0002/data/active-students.txt') as f:
         raw_students = f.readlines()
     for raw_student in raw_students:
-        student = raw_student.strip()
-        if not student in student_vms:
-            student_vms[student] = []
+        student_vms[raw_student.strip()] = {
+            'active': True,
+            'vms': [],
+        }
+
+    active_students = student_vms.keys()
+
+    for vm in vms:
+        student = vm['description']
+        if not student in active_students:
+            student_vms[student] = {
+                'active': False,
+                'vms': [],
+            }
+        student_vms[student]['vms'].append(vm)
 
     return student_vms
 
@@ -87,16 +96,22 @@ def group_vms_by_student(vms):
 def print_vms(vms, student='all'):
     student_vms = group_vms_by_student(vms)
     for s in sorted(student_vms.keys()):
-        if student not in ['all', s]:
+        if student == 'active':
+            if not student_vms[s]['active']:
+                continue
+        elif student == 'inactive':
+            if student_vms[s]['active']:
+                continue
+        elif student not in ['all', s]:
             continue
 
-        heading = '\nStudent %s VMs:' % s
+        heading = '\nStudent %s%s VMs:' % (s, '' if student_vms[s]['active'] else ' (INACTIVE)')
         if not student_vms[s]:
             print('%s none' % heading)
             continue
 
         print(heading)
-        for vm in student_vms[s]:
+        for vm in student_vms[s]['vms']:
             print('  - %s  %s  %s  %s' % (vm['name'], vm['ip'], vm['public_ssh'], vm['public_url']))
 
 
@@ -164,14 +179,14 @@ def adjust_vm_count(vms, student, vm_count):
     for s in student_list:
         actual_vm_count = 0
         if s in student_vms:
-            actual_vm_count = len(student_vms[s])
+            actual_vm_count = len(student_vms[s]['vms'])
         diff = abs(actual_vm_count - vm_count)
 
         print('Student %s has %d VMs, desired: %d' % (s, actual_vm_count, vm_count))
         if actual_vm_count > vm_count:
             for i in range(int(vm_count), actual_vm_count):
-                print('Deleting VM %s...' % student_vms[s][i]['name'])
-                delete_vm(student_vms[s][i]['uuid'])
+                print('Deleting VM %s...' % student_vms[s]['vms'][i]['name'])
+                delete_vm(student_vms[s]['vms'][i]['uuid'])
         elif actual_vm_count < vm_count:
             for i in range(actual_vm_count, int(vm_count)):
                 create_vm(s, i + 1)
@@ -185,9 +200,18 @@ def print_help():
     print('''Usage: %s <options>
 
       Options:
-        dump                    - generate HTML page
-        <student_name|all>      - print list of VMs for given student or everybody
-        <student_name|all> <n>  - create/delete VMs for given student or everybody''' % sys.argv[0])
+        dump         - generate HTML page
+        <query>      - print list of VMs
+        <query> <n>  - create/delete VMs
+
+      Query:
+        active                 - match active students (works with print only)
+        all                    - match all students
+        inactive               - match inactive students (works with print only)
+        <student_name>         - match this student name (exactly, no regexps)
+        <student_name>[,<...>] - match these student name (works with adjust only)
+
+      List of active students can be found in /opt/ica0002/data/active-students.txt.''' % sys.argv[0])
 
 
 def write_data(vms):
@@ -222,7 +246,7 @@ def write_data(vms):
         vm_ssh_logins = []
         vm_urls = []
 
-        for vm in student_vms[student]:
+        for vm in student_vms[student]['vms']:
             vm_ips.append(vm['ip'])
             vm_names.append(vm['name'])
             vm_urls.append('<a href="%s">%s</a>' % (vm['public_url'], vm['public_url']))
@@ -264,8 +288,8 @@ def write_data(vms):
     with open('/opt/ica0002/pub/vms.html', 'w') as f:
         f.write(html)
 
-    with open('/opt/ica0002/data/students-with-vms.txt', 'w') as f:
-        f.write('\n'.join(students) + '\n')
+    #with open('/opt/ica0002/data/students-with-vms.txt', 'w') as f:
+    #    f.write('\n'.join(students) + '\n')
 
 
 if len(sys.argv) <= 1:

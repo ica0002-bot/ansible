@@ -6,10 +6,12 @@
     roles:
       - role: users
         tags:
+          - skip_iptables
           - users
 
       - role: base
         tags:
+          - skip_iptables
           - base
 
       - role: iptables
@@ -18,24 +20,30 @@
 
       - role: github_bot
         tags:
+          - skip_iptables
           - github_bot
 
       - role: github_sucker
         tags:
+          - skip_iptables
           - github_sucker
 
       - role: dredd
         tags:
+          - skip_iptables
           - dredd
 
       - role: vm_admin
         tags:
+          - skip_iptables
           - vm_admin
 
       - role: cron
         tags:
+          - skip_iptables
           - cron
 
       - role: nginx
         tags:
+          - skip_iptables
           - nginx

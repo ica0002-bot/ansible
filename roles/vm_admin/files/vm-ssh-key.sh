@@ -1,6 +1,6 @@
 #!/bin/sh -eu
 
-vms_file="/opt/ica0002/data/vms-with-student-key-added.txt"
+vms_file="/opt/ica0002/data/ready-vms.txt"
 
 
 add_ssh_key() {
