@@ -18,7 +18,7 @@
 
 # Adjust VMs, sync keys and repos: every hour
 06 * * * * root /usr/local/bin/vm-admin active 2
-11 * * * * root /usr/local/bin/github-sucker update keys
+11 * * * * root /usr/local/bin/github-sucker keys
 21 * * * * root /usr/local/bin/vm-ssh-key all
-26 * * * * root /usr/local/bin/github-sucker update repos
+26 * * * * root /usr/local/bin/github-sucker repos
 31 * * * * root /usr/local/bin/dredd >/dev/null
