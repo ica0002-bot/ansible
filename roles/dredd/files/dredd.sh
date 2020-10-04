@@ -7,7 +7,9 @@ hosts:lab-1,lab-2,lab-3,lab-4
 lab02_web_server.yaml:lab-2
 lab03_web_app.yaml:lab-3
 lab04_web_app.yaml:lab-4
+lab05_dns.yaml:lab-5
 roles/agama/tasks/main.yaml:lab-3
+roles/bind/tasks/main.yaml:lab-5
 roles/nginx/tasks/main.yaml:lab-2,lab-3
 roles/users/tasks/main.yaml:lab-2
 roles/uwsgi/tasks/main.yaml:lab-3
