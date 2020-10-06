@@ -1,19 +1,21 @@
 #!/bin/sh -eu
 
 expected_files=$(cat <<EOF
-ansible.cfg:lab-1,lab-2,lab-3,lab-4
-group_vars/all.yaml:lab-4
-hosts:lab-1,lab-2,lab-3,lab-4
+ansible.cfg:lab-1,lab-2,lab-3,lab-4,lab-5,lab-6
+group_vars/all.yaml:lab-4,lab-5,lab-6
+hosts:lab-1,lab-2,lab-3,lab-4,lab-5,lab-6
 lab02_web_server.yaml:lab-2
 lab03_web_app.yaml:lab-3
 lab04_web_app.yaml:lab-4
 lab05_dns.yaml:lab-5
+lab06_prometheus.yaml:lab-6
 roles/agama/tasks/main.yaml:lab-3
-roles/bind/tasks/main.yaml:lab-5
+roles/bind/tasks/main.yaml:lab-5,lab-6
+roles/mysql/tasks/main.yaml:lab-4
 roles/nginx/tasks/main.yaml:lab-2,lab-3
+roles/prometheus/tasks/main.yaml:lab-6
 roles/users/tasks/main.yaml:lab-2
 roles/uwsgi/tasks/main.yaml:lab-3
-roles/mysql/tasks/main.yaml:lab-4
 EOF
 )
 
