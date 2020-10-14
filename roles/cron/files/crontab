@@ -22,3 +22,6 @@
 21 * * * * root /usr/local/bin/vm-ssh-key all
 26 * * * * root /usr/local/bin/github-sucker repos
 31 * * * * root /usr/local/bin/dredd >/dev/null
+
+# Delete inactive students VMs
+41 2 * * * root /usr/local/bin/vm-admin inactive 0
