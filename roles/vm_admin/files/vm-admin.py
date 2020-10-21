@@ -162,7 +162,7 @@ def create_vm(student, id):
             'name': '%s-%s' % (student, id),
             'description': student,
             'image': 'https://api.etais.ee/api/openstacktenant-images/7054bc7140894afc91af6b84c13a3798/',
-            'flavor': 'https://api.etais.ee/api/openstacktenant-flavors/fa67a49065274d3e8b6b1dcf80130236/',
+            'flavor': 'https://api.etais.ee/api/openstacktenant-flavors/5a8615aa7814412ebc210cb9fb7de26d/',
             'ssh_public_key': 'https://api.etais.ee/api/keys/6ecc7a9f69514c49b076d68245ac66b5/',
             'security_groups': [{
                 'url': 'https://api.etais.ee/api/openstacktenant-security-groups/70bdb790eb854be6b596bfdf4a4a572d/',
