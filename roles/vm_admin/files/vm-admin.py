@@ -57,6 +57,17 @@ def get_student_vms(student_query):
     waldur_vms = get_waldur_vms()
     q = set(student_query.split(','))
 
+    # Add queried students; these may be inactive and do not have any VMs
+    # but still should appear in the list
+    for student in q:
+        if student in {'all', 'active', 'inactive'}:
+            continue
+
+        student_vms[student] = {
+            'active': False,
+            'vms': [],
+        }
+
     # Add active students matching the query that may have some (or no) VMs
     for student in active_students:
         if not q & {'all', 'active', student}:
@@ -133,7 +144,7 @@ def print_vms(student_query):
     student_vms = get_student_vms(student_query)
     for student in sorted(student_vms.keys()):
         heading = '\n%s VMs:' % format_student(student, student_vms[student]['active'])
-        if not student_vms[student]:
+        if not student_vms[student]['vms']:
             print('%s none' % heading)
             continue
 
