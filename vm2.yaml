@@ -1,0 +1,9 @@
+---
+  - name: Server for shared services
+    hosts: vm2
+    become: yes
+    gather_facts: no
+    roles:
+      - role: users
+        tags:
+          - users
