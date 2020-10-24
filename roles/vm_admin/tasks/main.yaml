@@ -17,7 +17,8 @@
       dest: /usr/local/bin/vm-ssh-key
       mode: 0755
 
-  - name: Remove student VM manager -- use vm-admin instead
-    file:
-      path: /usr/local/bin/student-vms
-      state: absent
+  - name: Install Backup SSH Key tool
+    copy:
+      src: backup-ssh-key.sh
+      dest: /usr/local/bin/backup-ssh-key
+      mode: 0755

@@ -1,4 +1,5 @@
 vm1
+vm2  ansible_port=3922
 
 romankuchin-1  ansible_port=2022
 
