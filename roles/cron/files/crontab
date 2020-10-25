@@ -1,6 +1,7 @@
 # Update student and VM info -- every 15 minutes
 */15 * * * * root /usr/local/bin/github-bot
-*/15 * * * * root /usr/local/bin/vm-admin dump
+*/15 * * * * root sleep 60; /usr/local/bin/vm-admin dump
+*/15 * * * * root sleep 120; /usr/local/bin/backup-ssh-key all
 
 #
 # Jobs during class times
