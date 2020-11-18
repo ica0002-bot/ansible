@@ -129,6 +129,7 @@ def get_waldur_vms():
         vm_id = ip.split('.')[-1]
 
         vms.append({
+            'allowed_addresses': [ i['ip_address'] for i in vm['internal_ips_set'][0]['allowed_address_pairs']],
             'description': vm['description'],
             'ip': ip,
             'name': vm['name'],
@@ -316,12 +317,31 @@ def write_data():
     with open('/opt/ica0002/pub/vms.html', 'w') as f:
         f.write(html)
 
+def allow_additional_ips():
+    student_vms = get_student_vms('all')
+    for student in sorted(student_vms.keys()):
+        expected_allowed_ips = []
+        for vm in student_vms[student]['vms']:
+            expected_allowed_ips.append('192.168.100.%s' % vm['ip'].split('.')[-1])
+        for vm in student_vms[student]['vms']:
+            if sorted(expected_allowed_ips) != sorted(vm['allowed_addresses']):
+                payload = {
+                    'subnet': 'https://api.etais.ee/api/openstacktenant-subnets/850dbada4f1443abac5b10ce5bf3cfbc/',
+                    'allowed_address_pairs': [
+                        {'ip_address': '192.168.100.%s' % ip.split('.')[-1] } for ip in expected_allowed_ips
+                    ]
+                }
+                r = requests.post('%s/openstacktenant-instances/%s/update_allowed_address_pairs/' % (base_url, vm['uuid']), headers=headers, data=json.dumps(payload))
+                print('Request to update allowed IPs. Response: %s' % interpret_status_code(r.status_code))
+
 
 if len(sys.argv) < 2:
     print_help()
     sys.exit(1)
 elif sys.argv[1] == 'dump':
     write_data()
+elif sys.argv[1] == 'allow-haproxy-ips':
+    allow_additional_ips()
 elif len(sys.argv) < 3:
     print_vms(sys.argv[1])
 else:
