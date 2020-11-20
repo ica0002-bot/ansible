@@ -133,7 +133,7 @@ def get_waldur_vms():
             'description': vm['description'],
             'ip': ip,
             'name': vm['name'],
-            'public_ha_url': 'http://%s:30%03d' % (vm1_public_ip, int(vm_id)),
+            'public_ha_url': 'http://%s:%s88' % (vm1_public_ip, vm_id),
             'public_ssh': 'ubuntu@%s:%s22' % (vm1_public_ip, vm_id),
             'public_url': 'http://%s:%s80' % (vm1_public_ip, vm_id),
             'uuid': vm['uuid'],
