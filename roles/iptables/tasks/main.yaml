@@ -40,7 +40,7 @@
       protocol: tcp
       destination_port: "{{ item }}88"
       jump: DNAT
-      to_destination: 192.168.100.{{ item }}:80
+      to_destination: 192.168.100.{{ item }}:88
     with_sequence: start=10 end=200
     notify: Iptables save
 
