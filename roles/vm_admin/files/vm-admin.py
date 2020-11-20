@@ -302,7 +302,7 @@ def write_data():
         html += '</tr>'
 
     html += '''
-                <tr><th colspan="5">Total: %d &nbsp; &middot; &nbsp; Ready: %d</th></tr>
+                <tr><th colspan="6">Total: %d &nbsp; &middot; &nbsp; Ready: %d</th></tr>
             </table>
             <div class="footer">
                 Updated every 15 minutes. Last checked on %s.
