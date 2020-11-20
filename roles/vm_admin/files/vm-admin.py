@@ -133,6 +133,7 @@ def get_waldur_vms():
             'description': vm['description'],
             'ip': ip,
             'name': vm['name'],
+            'public_ha_url': 'http://%s:30%03d' % (vm1_public_ip, int(vm_id)),
             'public_ssh': 'ubuntu@%s:%s22' % (vm1_public_ip, vm_id),
             'public_url': 'http://%s:%s80' % (vm1_public_ip, vm_id),
             'uuid': vm['uuid'],
@@ -262,6 +263,7 @@ def write_data():
                     <th>VM IPs</th>
                     <th>Public SSH</th>
                     <th>Public URLs</th>
+                    <th>Public HA URLs</th>
                 </tr>
     '''
 
@@ -274,11 +276,13 @@ def write_data():
         vm_names = []
         vm_ssh_logins = []
         vm_urls = []
+        vm_ha_urls = []
 
         for vm in student_vms[student]['vms']:
             vm_ips.append(vm['ip'])
             vm_names.append(vm['name'])
             vm_urls.append('<a href="%s">%s</a>' % (vm['public_url'], vm['public_url']))
+            vm_ha_urls.append('<a href="%s">%s</a>' % (vm['public_ha_url'], vm['public_ha_url']))
 
             if vm['public_ssh'] == 'student_key_not_added_yet':
                 vm_ssh_logins.append('Still creating...')
@@ -294,6 +298,7 @@ def write_data():
         html += '<td>%s</td>' % ('<br>'.join(vm_ips or ['---']))
         html += '<td>%s</td>' % ('<br>'.join(vm_ssh_logins or ['---']))
         html += '<td>%s</td>' % ('<br>'.join(vm_urls or ['---']))
+        html += '<td>%s</td>' % ('<br>'.join(vm_ha_urls or ['---']))
         html += '</tr>'
 
     html += '''
