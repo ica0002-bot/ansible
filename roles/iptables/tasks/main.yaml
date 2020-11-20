@@ -32,3 +32,22 @@
       destination: "192.168.42.0/24"
       jump: MASQUERADE
     notify: Iptables save
+
+  - name: Iptables HTTP HA port forward
+    iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      destination_port: "{{ item }}88"
+      jump: DNAT
+      to_destination: 192.168.100.{{ item }}:80
+    with_sequence: start=10 end=200
+    notify: Iptables save
+
+  - name: Iptables masquerading HA
+    iptables:
+      table: nat
+      chain: POSTROUTING
+      destination: "192.168.100.0/24"
+      jump: MASQUERADE
+    notify: Iptables save
