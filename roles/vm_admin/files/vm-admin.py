@@ -181,12 +181,12 @@ def create_vm(student, id):
                 'url': 'https://api.etais.ee/api/openstacktenant-security-groups/70bdb790eb854be6b596bfdf4a4a572d/',
             }],
             'internal_ips_set': [{
-                'subnet': 'https://api.etais.ee/api/openstacktenant-subnets/850dbada4f1443abac5b10ce5bf3cfbc/',
+                'subnet': 'https://api.etais.ee/api/openstacktenant-subnets/324153f31fa0485e9aa58d0b5c3b3e2f/',
             }],
             'floating_ips': [],
             'system_volume_size': 10240,
-            'system_volume_type': 'https://api.etais.ee/api/openstacktenant-volume-types/c388cd0b264c4878a97c1a175d4eef9c/',
-            'data_volume_type': 'https://api.etais.ee/api/openstacktenant-volume-types/c388cd0b264c4878a97c1a175d4eef9c/',
+            'system_volume_type': 'https://api.etais.ee/api/openstacktenant-volume-types/c76e8ea53bea4b9a9d626c8590ef5515/',
+            'data_volume_type': 'https://api.etais.ee/api/openstacktenant-volume-types/c76e8ea53bea4b9a9d626c8590ef5515/',
         }
     }
     r = requests.post('%s/marketplace-cart-items/' % base_url, headers=headers, data=json.dumps(payload))
@@ -334,7 +334,7 @@ def allow_additional_ips():
         for vm in student_vms[student]['vms']:
             if sorted(expected_allowed_addresses) != sorted(vm['allowed_addresses']):
                 payload = {
-                    'subnet': 'https://api.etais.ee/api/openstacktenant-subnets/850dbada4f1443abac5b10ce5bf3cfbc/',
+                    'subnet': 'https://api.etais.ee/api/openstacktenant-subnets/324153f31fa0485e9aa58d0b5c3b3e2f/',
                     'allowed_address_pairs': [
                         {'ip_address': ip } for ip in expected_allowed_addresses
                     ]
