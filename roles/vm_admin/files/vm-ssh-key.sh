@@ -64,7 +64,7 @@ print_usage() {
 
 case "${1:-}" in
 1*)
-    vm=$(get_vms | grep "^$1" | head -1)
+    vm=$(get_vms | grep "^$1:" | head -1)
     add_ssh_key $(echo $vm | sed 's/:/ /')
     ;;
 a*)

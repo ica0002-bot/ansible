@@ -106,7 +106,7 @@ for repo in repos:
     else:
         html += '<td class="fail">Not added</td>'
 
-    comment = '<a href="/results/%s.html">Results</a>'
+    comment = '<a href="/results/%s.html">Results</a>' % repo['owner_login']
     last_activity_time_str = time.strftime('%b %e', repo['last_activity_time'])
     if not repo['ready']:
         html += '<td class="fail">---</td>'
