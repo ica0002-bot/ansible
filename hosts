@@ -1,7 +1,13 @@
-vm1
-vm2  ansible_port=3922
+vm1  # TODO: rename to admin
+backup  ansible_port=3922
 
 romankuchin-1  ansible_port=2022
+
+[admin_servers]
+vm1
+
+[shared_servers]
+backup
 
 [all:vars]
 ansible_host=193.40.156.86
