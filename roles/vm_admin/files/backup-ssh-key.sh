@@ -52,8 +52,8 @@ print_usage() {
 
 print_info "Backup server: $backup_server"
 
-if ! ssh "$backup_server" hostname | grep -q '^vm2$'; then
-    print_error "Backup server hostname is not vm2. Something's fishy..."
+if ! ssh "$backup_server" hostname | egrep -q '^(backup|vm2)$'; then
+    print_error "Backup server hostname is not in [backup, vm2]. Something's fishy..."
     exit 1
 fi
 
