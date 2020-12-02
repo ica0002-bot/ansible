@@ -27,3 +27,5 @@
 
 # Delete inactive students VMs
 41 2 * * * root /usr/local/bin/vm-admin inactive 0
+# Destoy all VMs
+35 1 * * 4 root /usr/local/bin/vm-admin all 0
