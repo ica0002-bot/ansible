@@ -92,7 +92,7 @@ EOF
         service_path=$(echo "$service" | cut -d: -f2)
         service_count_expected=$(echo "$service" | cut -d: -f3)
         service_count_actual=0
-        if $(echo "$service_name" | grep -q '_HA_'); then
+        if $(echo "$service" | grep -q '_HA_'); then
             service_urls=$(echo "$student_ha_vm_urls" | sed -E "s|(:[0-9]+88)|\1$service_path|g")
         else
             service_urls=$(echo "$student_vm_urls" | sed -E "s|(:[0-9]+80)|\1$service_path|g")
