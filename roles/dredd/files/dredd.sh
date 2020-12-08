@@ -4,7 +4,7 @@ expected_files=$(cat <<EOF
 ansible.cfg:lab-1,lab-2,lab-3,lab-4,lab-5,lab-6,lab-7,lab-8
 backup_restore.md:lab-10,lab-12
 backup_sla.md:lab-9,lab-10
-grafana_dashboard.json:lab-7,lab-8,lab-11
+grafana_dashboard.json:lab-7,lab-8,lab-11,lab-13
 group_vars/all.yaml:lab-4,lab-5,lab-6,lab-7,lab-8
 hosts:lab-1,lab-2,lab-3,lab-4,lab-5,lab-6,lab-7,lab-8
 lab02_web_server.yaml:lab-2
