@@ -2,9 +2,9 @@
 
 expected_files=$(cat <<EOF
 ansible.cfg:lab-1,lab-2,lab-3,lab-4,lab-5,lab-6,lab-7,lab-8
-backup_restore.md:lab-10
+backup_restore.md:lab-10,lab-12
 backup_sla.md:lab-9,lab-10
-grafana_dashboard.json:lab-7,lab-8,lab-11
+grafana_dashboard.json:lab-7,lab-8,lab-11,lab-13,lab-14
 group_vars/all.yaml:lab-4,lab-5,lab-6,lab-7,lab-8
 hosts:lab-1,lab-2,lab-3,lab-4,lab-5,lab-6,lab-7,lab-8
 lab02_web_server.yaml:lab-2
@@ -17,12 +17,20 @@ lab08_logging.yaml:lab-8
 lab09_backups.yaml:lab-9
 lab10_backups.yaml:lab-10
 lab11_mysql_ha.yaml:lab-11
+lab12_docker.yaml:lab-12
+lab13_haproxy.yaml:lab-13
+lab14_bind_slave.yaml:lab-14
 roles/agama/tasks/main.yaml:lab-3
+roles/agama_docker/tasks/main.yaml:lab-12,lab-13
 roles/backup/tasks/main.yaml:lab-9,lab-10
-roles/bind/tasks/main.yaml:lab-5,lab-6
+roles/bind/tasks/main.yaml:lab-5,lab-6,lab-14
 roles/bind_exporter/tasks/main.yaml:lab-7
+roles/docker/tasks/main.yaml:lab-12
 roles/grafana/tasks/main.yaml:lab-7
+roles/grafana_docker/tasks/main.yaml:lab-12
+roles/haproxy/tasks/main.yaml:lab-13
 roles/influxdb/tasks/main.yaml:lab-8
+roles/keepalived/tasks/main.yaml:lab-13
 roles/mysql/tasks/main.yaml:lab-4,lab-11
 roles/mysql_exporter/tasks/main.yaml:lab-7
 roles/nginx/tasks/main.yaml:lab-2,lab-3
@@ -36,10 +44,11 @@ EOF
 )
 
 known_service_url_paths=$(cat <<EOF
-Wep_app_(labs_3,_4,_7)::1
+Wep_app_(labs_3,_4,_7,_13)::2
+Wep_app_HA_(lab_13)::1
 Grafana_(lab_7):/grafana:1
 Prometheus_(labs_6,_7):/prometheus:1
-Bind_metrics_(lab_7):/bind-metrics:1
+Bind_metrics_(labs_7,_14):/bind-metrics:2
 MySQL_metrics_(labs_7,_11):/mysql-metrics:2
 Nginx_metrics_(lab_7):/nginx-metrics:2
 Node_metrics_(labs_6,_7):/metrics:2
@@ -50,6 +59,7 @@ check_student() {
     student="$1"
     student_vm_ips=$(echo "$2" | sed 's/,/ /g')
     student_vm_urls=$(echo "$student_vm_ips" | sed -E 's|192.168.42.([0-9]+)|http://193.40.156.86:\180|g')
+    student_ha_vm_urls=$(echo "$student_vm_ips" | sed -E 's|192.168.42.([0-9]+)|http://193.40.156.86:\188|g')
 
     labs_not_done=""
     repo="/opt/ica0002/data/students/$student/git"
@@ -82,7 +92,11 @@ EOF
         service_path=$(echo "$service" | cut -d: -f2)
         service_count_expected=$(echo "$service" | cut -d: -f3)
         service_count_actual=0
-        service_urls=$(echo "$student_vm_urls" | sed -E "s|(:[0-9]+80)|\1$service_path|g")
+        if $(echo "$service" | grep -q '_HA_'); then
+            service_urls=$(echo "$student_ha_vm_urls" | sed -E "s|(:[0-9]+88)|\1$service_path|g")
+        else
+            service_urls=$(echo "$student_vm_urls" | sed -E "s|(:[0-9]+80)|\1$service_path|g")
+        fi
 
         html="$html\n<tr><td>$service_name</td>"
         urls_up=""
@@ -153,7 +167,8 @@ EOF
     # Print summary
     if [ "$result" = true ]; then
         html="$html\n<p>All good do far.</p>"
-        echo "All good."
+        echo "All good. Checking if student has 3 VMs for exam..."
+        /usr/local/bin/vm-admin $student 3
     else
         html="$html\n<p>A few problems found.</p>"
         echo "A few problems found."

@@ -1,6 +1,6 @@
 #!/bin/sh -eu
 
-backup_server=192.168.42.39
+backup_server=192.168.42.31
 
 
 add_ssh_key() {

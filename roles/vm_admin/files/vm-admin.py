@@ -215,7 +215,9 @@ def adjust_vm_count(student_query, vm_count):
         diff = abs(actual_vm_count - vm_count)
 
         print('%s has %d VMs, desired: %d' % (format_student(student, student_vms[student]['active']), actual_vm_count, vm_count))
-        if actual_vm_count > vm_count:
+        if vm_count == 2 and actual_vm_count == 3:
+            print('Looks like %s is ready for exam. Keeping 3 VMs.' % student)
+        elif actual_vm_count > vm_count:
             for i in range(int(vm_count), actual_vm_count):
                 print('Deleting VM %s...' % student_vms[student]['vms'][i]['name'])
                 delete_vm(student_vms[student]['vms'][i]['uuid'])
