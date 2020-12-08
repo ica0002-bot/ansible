@@ -153,7 +153,8 @@ EOF
     # Print summary
     if [ "$result" = true ]; then
         html="$html\n<p>All good do far.</p>"
-        echo "All good."
+        echo "All good. Checking if student has 3 VMs for exam..."
+        /usr/local/bin/vm-admin $student 3
     else
         html="$html\n<p>A few problems found.</p>"
         echo "A few problems found."

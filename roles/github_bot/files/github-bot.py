@@ -8,14 +8,19 @@ import time
 with open('/root/.github-api-token') as f:
     token = f.readlines()[0].strip()
 
+auto_accept_invites = False
+
 header = { 'Authorization': 'token %s' % token }
 # Check for invitations
 url = 'https://api.github.com/user/repository_invitations'
 r = requests.get(url, headers=header)
 for invitation in r.json():
-    url = 'https://api.github.com/user/repository_invitations/%d' % invitation['id']
-    r = requests.patch(url, headers=header)
-    print('Accepted invitation to %s' % invitation['repository']['full_name'])
+    if auto_accept_invites:
+        url = 'https://api.github.com/user/repository_invitations/%d' % invitation['id']
+        r = requests.patch(url, headers=header)
+        print('Accepted invitation to %s' % invitation['repository']['full_name'])
+    else:
+        print('Pending invitation to %s. Auto-accept is off' % invitation['repository']['full_name'])
 
 # Check for repositories
 repos = []
