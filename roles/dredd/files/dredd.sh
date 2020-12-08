@@ -44,11 +44,11 @@ EOF
 )
 
 known_service_url_paths=$(cat <<EOF
-Wep_app_(labs_3,_4,_7)::1
+Wep_app_(labs_3,_4,_7,_13)::2
 Wep_app_HA_(lab_13)::1
 Grafana_(lab_7):/grafana:1
 Prometheus_(labs_6,_7):/prometheus:1
-Bind_metrics_(lab_7):/bind-metrics:1
+Bind_metrics_(labs_7,_14):/bind-metrics:2
 MySQL_metrics_(labs_7,_11):/mysql-metrics:2
 Nginx_metrics_(lab_7):/nginx-metrics:2
 Node_metrics_(labs_6,_7):/metrics:2
