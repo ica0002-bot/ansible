@@ -24,7 +24,7 @@ add_ssh_key() {
     fi
 
     print_info "Authorizing $vm_ip backup SSH key on the backup server..."
-    if ! ssh "$backup_server" "grep -q '$key' /home/$user/.ssh/authorized_keys || echo '$key' | sudo -u'$user' tee -a /home/$user/.ssh/authorized_keys"; then
+    if ! ssh "$backup_server" "grep -q '$key' /home/$user/.ssh/authorized_keys || sudo -u'$user' mkdir -p /home/$user/.ssh && echo '$key' | sudo -u'$user' tee -a /home/$user/.ssh/authorized_keys"; then
         print_error "Failed to add key."
         return 1
     fi
