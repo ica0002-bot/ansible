@@ -120,14 +120,14 @@ def get_waldur_vms():
         # Skip VMs with empty description
         if 'description' not in vm or not vm['description']:
             continue
-
-        # Skip VMs that do not have an IP address
-        if not 'internal_ips' in vm or not vm['internal_ips'] or not vm['internal_ips'][0]:
-            continue
         
         if vm['state'] == 'Erred':
             print('%s in ERRED state. Deleting...' % vm['name'])
             delete_vm(vm['uuid'])
+            continue
+        
+        # Skip VMs that do not have an IP address
+        if not 'internal_ips' in vm or not vm['internal_ips'] or not vm['internal_ips'][0]:
             continue
 
         ip = vm['internal_ips'][0]
