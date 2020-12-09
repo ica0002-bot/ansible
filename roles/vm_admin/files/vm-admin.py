@@ -120,7 +120,12 @@ def get_waldur_vms():
         # Skip VMs with empty description
         if 'description' not in vm or not vm['description']:
             continue
-
+        
+        if vm['state'] == 'Erred':
+            print('%s in ERRED state. Deleting...' % vm['name'])
+            delete_vm(vm['uuid'])
+            continue
+        
         # Skip VMs that do not have an IP address
         if not 'internal_ips' in vm or not vm['internal_ips'] or not vm['internal_ips'][0]:
             continue
@@ -226,9 +231,6 @@ def adjust_vm_count(student_query, vm_count):
                 create_vm(student, i + 1)
         print('---')
         time.sleep(2)
-    time.sleep(13)
-    print('Checking for ERRED VMs...')
-    delete_errored_vms()
     print('All good.')
 
 
@@ -347,24 +349,6 @@ def allow_additional_ips():
                 r = requests.post(request_url, headers=headers, data=json.dumps(payload))
                 print('Request to update allowed IPs. Response: %s' % interpret_status_code(r.status_code))
 
-def delete_errored_vms():
-    vms = []
-
-    print('Retrieving list of VMs from Waldur...')
-    r = requests.get('%s/openstacktenant-instances/?page_size=200&project=%s' % (base_url, project_id), headers=headers)
-    raw_vm_list = r.json()
-    if not isinstance(raw_vm_list, list):
-        print('ERROR: Could not get VM list from Waldur. Got this instead:')
-        print(raw_vm_list)
-        sys.exit(1)
-
-    for vm in raw_vm_list:
-        # Skip VMs with empty description
-        if 'description' not in vm or not vm['description']:
-            continue
-        if vm['state'] == 'Erred':
-            print('%s in ERRED state. Deleting...' % vm['name'])
-            delete_vm(vm['uuid'])
 
 if len(sys.argv) < 2:
     print_help()
