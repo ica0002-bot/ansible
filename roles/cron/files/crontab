@@ -26,6 +26,6 @@
 31 * * * * root /usr/local/bin/dredd >/dev/null
 
 # Delete inactive students VMs
-41 2 * * * root /usr/local/bin/vm-admin inactive 0
-# Destoy all VMs
-35 1 * * 4 root /usr/local/bin/vm-admin all 0
+#41 2 * * * root /usr/local/bin/vm-admin inactive 0
+# Destoy all VMs every night
+50 1 * * * root /usr/local/bin/vm-admin all 0
