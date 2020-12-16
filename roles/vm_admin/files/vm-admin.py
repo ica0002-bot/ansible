@@ -318,6 +318,9 @@ def write_data():
                 Cannot find yourself in this list?
                 Make sure your GitHub repository is <a href="/students.html">set up correctly</a>.
                 <br><br>
+                Want to reset VMs?
+                Create an issue in your own repo with word <b>DESTROY</b> in title. Our bot will recreate VMs for you.
+                <br><br>
                 If you believe that something is still wrong please
                 <a href="https://github.com/romankuchin/ica0002-2020#teacher-contacts">contact us</a>.
             </div>
