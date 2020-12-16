@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import os
 import requests
 import time
 
@@ -69,6 +70,18 @@ for raw_repo in r.json():
         active_repo_count += 1
 
     repos.append(repo)
+
+    # Check for open issues with DESTROY in title
+    url = 'https://api.github.com/repos/%s/%s/issues' % (repo['owner_login'], repo['name'])
+    r = requests.get(url, headers=header)
+    for issue in r.json():
+        if 'DESTROY' in issue['title']:
+            print('Killing VMs for %s. Issue: %s' % (repo['owner_login'], issue['number']))
+            os.system('/usr/local/bin/vm-admin %s 0' % raw_repo['owner']['login'])
+            r = requests.post('%s/%s/comments' % (url, issue['number']), headers=header, json={"body": "I killed your VMs\n\nBest regards,\nGitHub bot"})
+            print(r.status_code)
+            r = requests.patch('%s/%s' % (url, issue['number']), headers=header, json={"state": "closed"})
+            print(r.status_code)
 
 repos = sorted(repos, key=lambda k: k['owner_login'])
 
