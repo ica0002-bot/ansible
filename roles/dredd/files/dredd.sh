@@ -60,6 +60,7 @@ EOF
 check_student() {
     student="$1"
     student_vm_ips=$(echo "$2" | sed 's/,/ /g')
+    student_vm_count=$(echo "$2" | awk -F, '{print NF}')
     student_vm_urls=$(echo "$student_vm_ips" | sed -E 's|192.168.42.([0-9]+)|http://193.40.156.86:\180|g')
     student_ha_vm_urls=$(echo "$student_vm_ips" | sed -E 's|192.168.42.([0-9]+)|http://193.40.156.86:\188|g')
 
@@ -170,7 +171,11 @@ EOF
     if [ "$result" = true ]; then
         html="$html\n<p>All good do far.</p>"
         echo "All good. Checking if student has 3 VMs for exam..."
-        /usr/local/bin/vm-admin $student 3
+        if [ "$student_vm_count" = "3" ]; then 
+            echo "Ok"
+        else 
+            /usr/local/bin/vm-admin $student 3
+        fi
     else
         html="$html\n<p>A few problems found.</p>"
         echo "A few problems found."
