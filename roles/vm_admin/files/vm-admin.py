@@ -160,12 +160,12 @@ def print_vms(student_query):
             print('  - %s  %s  %s  %s' % (vm['name'], vm['ip'], vm['public_ssh'], vm['public_url']))
 
 
-def interpret_status_code(code):
-    if code in [200, 201, 202]:
+def interpret_status_code(resp):
+    if resp.status_code in [200, 201, 202]:
         return '\033[92m[OK]\033[0m'
 
-    if code == 400:
-        return '\033[91m[FAIL]\033[0m'
+    if resp.status_code == 400:
+        return '\033[91m[FAIL]\033[0m Error: %s' % resp.content
 
     return code
 
@@ -183,7 +183,7 @@ def create_vm(student, id):
             'flavor': 'https://api.etais.ee/api/openstacktenant-flavors/5a8615aa7814412ebc210cb9fb7de26d/',
             'ssh_public_key': 'https://api.etais.ee/api/keys/6ecc7a9f69514c49b076d68245ac66b5/',
             'security_groups': [{
-                'url': 'https://api.etais.ee/api/openstacktenant-security-groups/70bdb790eb854be6b596bfdf4a4a572d/',
+                'url': 'https://api.etais.ee/api/openstacktenant-security-groups/bf3a33a1a5b84079aeba1107d6075b0a/',
             }],
             'internal_ips_set': [{
                 'subnet': 'https://api.etais.ee/api/openstacktenant-subnets/324153f31fa0485e9aa58d0b5c3b3e2f/',
@@ -195,18 +195,18 @@ def create_vm(student, id):
         }
     }
     r = requests.post('%s/marketplace-cart-items/' % base_url, headers=headers, data=json.dumps(payload))
-    print('Request to create VM. Response: %s' % interpret_status_code(r.status_code))
+    print('Request to create VM. Response: %s' % interpret_status_code(r))
 
     payload = {
         'project': 'https://api.etais.ee/api/projects/%s/' % project_id,
     }
     r = requests.post('%s/marketplace-cart-items/submit/' % base_url, headers=headers, data=json.dumps(payload))
-    print('Submit request. Response: %s' % interpret_status_code(r.status_code))
+    print('Submit request. Response: %s' % interpret_status_code(r))
 
 
 def delete_vm(vm_id):
     r = requests.delete('%s/openstacktenant-instances/%s/force_destroy/?delete_volumes=true&release_floating_ips=true' % (base_url, vm_id), headers=headers)
-    print('Request to delete VM. Response: %s' % interpret_status_code(r.status_code))
+    print('Request to delete VM. Response: %s' % interpret_status_code(r))
 
 
 def adjust_vm_count(student_query, vm_count):
@@ -350,7 +350,7 @@ def allow_additional_ips():
                 }
                 request_url = '%s/openstacktenant-instances/%s/update_allowed_address_pairs/' % (base_url, vm['uuid'])
                 r = requests.post(request_url, headers=headers, data=json.dumps(payload))
-                print('Request to update allowed IPs. Response: %s' % interpret_status_code(r.status_code))
+                print('Request to update allowed IPs. Response: %s' % interpret_status_code(r))
 
 
 if len(sys.argv) < 2:

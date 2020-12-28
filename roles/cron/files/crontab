@@ -1,5 +1,5 @@
 # Update student and VM info -- every 15 minutes
-*/15 * * * * root /usr/local/bin/github-bot
+#*/15 * * * * root /usr/local/bin/github-bot
 */15 * * * * root sleep 60; /usr/local/bin/vm-admin dump
 */15 * * * * root sleep 120; /usr/local/bin/backup-ssh-key all
 
@@ -18,12 +18,14 @@
 #
 
 # Adjust VMs, sync keys and repos: every hour
-06 * * * * root /usr/local/bin/vm-admin active 2
-11 * * * * root /usr/local/bin/github-sucker keys
-21 * * * * root /usr/local/bin/vm-ssh-key all
-23 * * * * root /usr/local/bin/vm-admin vips
-26 * * * * root /usr/local/bin/github-sucker repos
-31 * * * * root /usr/local/bin/dredd >/dev/null
+#06 * * * * root /usr/local/bin/vm-admin active 2;
+#11 * * * * root /usr/local/bin/github-sucker keys
+#21 * * * * root /usr/local/bin/vm-ssh-key all
+#23 * * * * root /usr/local/bin/vm-admin vips
+#26 * * * * root /usr/local/bin/github-sucker repos
+#31 * * * * root /usr/local/bin/dredd >/dev/null
+
+06,36 * * * * root /usr/local/bin/github-bot; sleep 60; /usr/local/bin/vm-admin active 2; /usr/local/bin/github-sucker repos; /usr/local/bin/dredd >/dev/null; /usr/local/bin/github-sucker keys; /usr/local/bin/vm-ssh-key all; /usr/local/bin/vm-admin vips; vm-admin dump 
 
 # Delete inactive students VMs
 #41 2 * * * root /usr/local/bin/vm-admin inactive 0
